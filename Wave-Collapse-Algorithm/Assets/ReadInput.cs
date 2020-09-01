@@ -7,6 +7,92 @@ namespace WaveFunctionCollapse
 {
     public static class ReadInput
     {
+        #region Pattern
+        public static int[][] GetPatternArray(int[][] offset, int pattern_size)
+        {
+            //Get sizes and setup result array
+            int size_x = offset.Length;
+            int size_y = offset[0].Length;
+            int[][] result = new int[size_x][];
+
+            for (int x = 0; x < size_x; x++)
+                result[x] = new int[size_x];
+            for (int x = 0; x < size_x; x++)
+                for (int y = 0; y < size_y; y++)
+                    result[x][y] = offset[x][y];
+
+            //This array is used to store the unique pattern indexes
+            List<int[][]>  unique_patterns = new List<int[][]>();
+
+            //This array will contain the indexes of the patterns each cell belongs to
+            int[][] current_pattern = new int[pattern_size][];
+            for (int i = 0; i < pattern_size; i++)
+                current_pattern[i] = new int[pattern_size];
+
+            for (int x = 0; x < size_x; x++)
+            {
+                for (int y = 0; y < size_y; y++)
+                {
+                    //Get the next pattern if not out of bounds
+                    if (x + pattern_size - 1 < size_x && y + pattern_size - 1 < size_y)
+                    {
+                        for (int b = 0; b < pattern_size; b++)
+                        {
+                            for (int a = 0; a < pattern_size; a++)
+                            {
+                                current_pattern[a][b] = result[x + a][y + b];
+                            }
+                        }
+                    }
+
+                    //Compare it to other patterns in the unique pattern list
+                    int unique_id = unique_patterns.Count;
+                    for (int i = 0; i < unique_patterns.Count; i++)
+                        if (CompareArrays(unique_patterns[i],current_pattern))
+                        {
+                            unique_id = i;
+                            i = unique_patterns.Count;
+                        }
+
+
+                    //If this condition is true it means that the current pattern
+                    //Is unique and must add it to the unique pattern list
+                    if (unique_id == unique_patterns.Count)
+                    {
+                        int[][] new_pattern = new int[pattern_size][];
+                        for (int i = 0; i < pattern_size; i++)
+                            new_pattern[i] = new int[pattern_size];
+
+                        for (int o = 0; o < pattern_size; o++)
+                            for (int i = 0; i < pattern_size; i++)
+                                new_pattern[i][o] = current_pattern[i][o];
+                        unique_patterns.Add(new_pattern);
+                    }
+
+                    //Finally modify the pattern array to contain the indexes of the patterns
+                    result[x][y] = unique_id;
+
+                }
+            }
+
+            //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
+            return (result);
+        }
+        static bool CompareArrays(int[][] a, int[][] b) 
+        {
+            if (a == null || b == null)
+                Debug.LogError("Cannot compare null arrays.");
+            else if (a.Length == 0 || b.Length == 0)
+                Debug.Log("Cannot compare empty arrays.");
+
+            for (int y = 0; y < a.Length; y++)
+                for (int x = 0; x < a[0].Length; x++)
+                    if (a[x][y] != b[x][y])
+                        return false;
+            return true;
+        }
+        #endregion
+        #region Offset
         public static int[][] GetOffsetArray (int[][] input, int padding)
         {
             //Debug
@@ -21,8 +107,8 @@ namespace WaveFunctionCollapse
             int input_x, input_y, output_x, output_y;
             input_x = input.Length;
             input_y = input[0].Length;
-            output_x = input.Length + padding * 1;
-            output_y = input[0].Length + padding * 1;
+            output_x = input_x + padding * 1;
+            output_y = input_y + padding * 1;
             int[][] result = new int[output_x][];
 
             //Fill each cell of the output array
@@ -51,5 +137,6 @@ namespace WaveFunctionCollapse
             }
             return result;
         }
+        #endregion
     }
 }

@@ -6,20 +6,24 @@ using WaveFunctionCollapse;
 
 public class Tester : MonoBehaviour
 {
+    public int pattern_size = 2;
     #region Active
     int[][] input;
     int[][] offset;
+    int[][] pattern;
     private void Start()
     {
-        StartCoroutine (Test());
+        StartCoroutine(Test());
     }
 
     IEnumerator Test()
     {
         input = GenerateInput();
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
-        offset = ReadInput.GetOffsetArray(input,2);
+        offset = ReadInput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
+        pattern = ReadInput.GetPatternArray(offset, pattern_size);
+        Debug.Log("<color=yellow> Pattern grid output: \n</color> " + ReadArray(pattern));
         Debug.Log("Finished test routine.");
         yield break;
     }
@@ -30,11 +34,12 @@ public class Tester : MonoBehaviour
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
         List<int[]> lists = new List<int[]>();
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
-        lists.Add(new int[5] { 1, 1, 1, 1, 1 });
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
+        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
+        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
+        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
         result = lists.ToArray();
         return result;
     }
