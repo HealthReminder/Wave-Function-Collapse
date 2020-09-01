@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WaveFunctionCollapse;
 
 public class Tester : MonoBehaviour
 {
     #region Active
     int[][] input;
+    int[][] offset;
     private void Start()
     {
         StartCoroutine (Test());
@@ -14,7 +17,9 @@ public class Tester : MonoBehaviour
     IEnumerator Test()
     {
         input = GenerateInput();
-        Debug.Log(ReadArray(input));
+        Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
+        offset = ReadInput.GetOffsetArray(input,2);
+        Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
         Debug.Log("Finished test routine.");
         yield break;
     }
@@ -42,7 +47,6 @@ public class Tester : MonoBehaviour
             log += ("NULL INT ARRAY");
         else
         {
-            log += "\n";
             for (int i = 0; i < array.Length; i++)
             {
                 for (int o = 0; o < array[i].Length; o++)
@@ -54,6 +58,8 @@ public class Tester : MonoBehaviour
             }
             log += "\n";
         }
+
+        log += "\n";
         return log;
     }
 
