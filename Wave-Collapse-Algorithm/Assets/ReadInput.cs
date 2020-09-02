@@ -5,82 +5,26 @@ using UnityEngine;
 
 namespace WaveFunctionCollapse
 {
-    public static class ReadInput
+    
+
+    public static class Pattern
     {
-        #region Pattern
-        public static (List<int[][]> pattern_list, List<int> frequency_list) GetPatternList(int[][] pattern_grid, int[][] offset, int pattern_size)
+        public static (int[][] pattern_array, List<int[][]> pattern_list, List<int> frequency_list) GetPatternInformation(int[][] offset, int pattern_size)
         {
-
-            //Get sizes and setup result array
-            int size_x = pattern_grid.Length;
-            int size_y = pattern_grid[0].Length;
-
-            //Lists to store each unique pattern and frequencies
-            List<int[][]> pattern_list = new List<int[][]>();
-            List<int> frequency_list = new List<int>();
-
-            //Go over the ids stored in the pattern grid 
-            //Pick the unique ones and increment frequency
-            for (int x = 0; x < size_x; x++)
-            {
-                for (int y = 0; y < size_y; y++)
-                {
-                    if (pattern_list.Count != frequency_list.Count)
-                        Debug.LogError("Pattern list and frequency list quantities don't match.");
-
-                    //Get the next id in the grid
-                    int current_id = pattern_grid[x][y];
-
-                    if(current_id == -1)
-                    {
-                        Debug.Log("Pattern not found. Index of -1");
-                    }
-                    else if (current_id == pattern_list.Count)
-                    {
-                        pattern_list.Add()
-                    }
-                    for (int i = 0; i < unique_patterns.Count; i++)
-                        
-
-                    //If this condition is true it means that the current pattern
-                    //Is unique and must add it to the unique pattern list
-                    if (unique_id == unique_patterns.Count)
-                    {
-                        int[][] new_pattern = new int[pattern_size][];
-                        for (int i = 0; i < pattern_size; i++)
-                            new_pattern[i] = new int[pattern_size];
-
-                        for (int o = 0; o < pattern_size; o++)
-                            for (int i = 0; i < pattern_size; i++)
-                                new_pattern[i][o] = current_pattern[i][o];
-                        unique_patterns.Add(new_pattern);
-                    }
-
-                    //Finally modify the pattern array to contain the indexes of the patterns
-                    result[x][y] = unique_id;
-
-                }
-            }
-
-            //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
-            return (result);
-        }
-        public static int[][] GetPatternArray(int[][] offset, int pattern_size)
-        {
-
             //Get sizes and setup result array
             int size_x = offset.Length;
             int size_y = offset[0].Length;
-            int[][] result = new int[size_x][];
+            int[][] pattern_array = new int[size_x][];
 
             for (int x = 0; x < size_x; x++)
-                result[x] = new int[size_x];
+                pattern_array[x] = new int[size_x];
             for (int x = 0; x < size_x; x++)
                 for (int y = 0; y < size_y; y++)
-                    result[x][y] = offset[x][y];
+                    pattern_array[x][y] = offset[x][y];
 
             //This array is used to store the unique pattern indexes
-            List<int[][]>  unique_patterns = new List<int[][]>();
+            List<int[][]> pattern_list = new List<int[][]>();
+            List<int> frequency_list = new List<int>();
 
             //This array will contain the indexes of the patterns each cell belongs to
             int[][] current_pattern = new int[pattern_size][];
@@ -99,10 +43,13 @@ namespace WaveFunctionCollapse
                         {
                             for (int a = 0; a < pattern_size; a++)
                             {
-                                current_pattern[a][b] = result[x + a][y + b];
+                                //For some reason b must be in place of a
+                                //Otherwise pattern identification invert axis
+                                current_pattern[b][a] = pattern_array[x + a][y + b];
                             }
                         }
-                    } else
+                    }
+                    else
                     {
                         is_out_of_bounds = true;
                     }
@@ -110,41 +57,48 @@ namespace WaveFunctionCollapse
                     if (!is_out_of_bounds)
                     {
                         //Compare it to other patterns in the unique pattern list
-                        int unique_id = unique_patterns.Count;
-                        for (int i = 0; i < unique_patterns.Count; i++)
-                            if (CompareArrays(unique_patterns[i], current_pattern))
+                        int unique_id = pattern_list.Count;
+                        for (int i = 0; i < pattern_list.Count; i++)
+                            if (CompareArrays(pattern_list[i], current_pattern))
                             {
+                                Debug.Log(current_pattern[0][0] + "|" + current_pattern[1][0]);
+                                frequency_list[i]++;
                                 unique_id = i;
-                                i = unique_patterns.Count;
+                                i = pattern_list.Count;
                             }
 
                         //If this condition is true it means that the current pattern
                         //Is unique and must add it to the unique pattern list
-                        if (unique_id == unique_patterns.Count)
+                        if (unique_id == pattern_list.Count)
                         {
+                            //Instantiate new pattern
                             int[][] new_pattern = new int[pattern_size][];
                             for (int i = 0; i < pattern_size; i++)
                                 new_pattern[i] = new int[pattern_size];
-
                             for (int o = 0; o < pattern_size; o++)
                                 for (int i = 0; i < pattern_size; i++)
                                     new_pattern[i][o] = current_pattern[i][o];
-                            unique_patterns.Add(new_pattern);
+                            //Create an instance in pattern list and set frequency
+                            pattern_list.Add(new_pattern);
+                            frequency_list.Add(1);
                         }
-
                         //Finally modify the pattern array to contain the indexes of the patterns
-                        result[x][y] = unique_id;
-                    } else
+                        pattern_array[x][y] = unique_id;
+                    }
+                    else
                     {
-                        result[x][y] = -1;
+                        pattern_array[x][y] = -1;
                     }
                 }
             }
 
+            if (pattern_list.Count != frequency_list.Count)
+                Debug.LogError("Pattern list and frequency list counts does not match.");
+
             //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
-            return (result);
+            return (pattern_array, pattern_list, frequency_list);
         }
-        static bool CompareArrays(int[][] a, int[][] b) 
+        static bool CompareArrays(int[][] a, int[][] b)
         {
             if (a == null || b == null)
                 Debug.LogError("Cannot compare null arrays.");
@@ -157,8 +111,10 @@ namespace WaveFunctionCollapse
                         return false;
             return true;
         }
-        #endregion
-        #region Offset
+    }
+    
+    public static class ReadInput
+    {
         public static int[][] GetOffsetArray (int[][] input, int padding)
         {
             //Debug
@@ -203,6 +159,5 @@ namespace WaveFunctionCollapse
             }
             return result;
         }
-        #endregion
     }
 }
