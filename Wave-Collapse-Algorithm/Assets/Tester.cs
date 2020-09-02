@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WaveFunctionCollapse;
@@ -22,9 +21,9 @@ public class Tester : MonoBehaviour
     {
         input = GenerateInput();
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
-        offset = ReadInput.GetOffsetArray(input, pattern_size);
+        offset = WFCInput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
-        var pattern_info = Pattern.GetPatternInformation(offset, pattern_size);
+        var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
         pattern = pattern_info.pattern_array;
         Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArray(pattern));
         unique = pattern_info.pattern_list;
