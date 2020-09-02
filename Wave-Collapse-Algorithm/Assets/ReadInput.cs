@@ -8,6 +8,63 @@ namespace WaveFunctionCollapse
     public static class ReadInput
     {
         #region Pattern
+        public static (List<int[][]> pattern_list, List<int> frequency_list) GetPatternList(int[][] pattern_grid, int[][] offset, int pattern_size)
+        {
+
+            //Get sizes and setup result array
+            int size_x = pattern_grid.Length;
+            int size_y = pattern_grid[0].Length;
+
+            //Lists to store each unique pattern and frequencies
+            List<int[][]> pattern_list = new List<int[][]>();
+            List<int> frequency_list = new List<int>();
+
+            //Go over the ids stored in the pattern grid 
+            //Pick the unique ones and increment frequency
+            for (int x = 0; x < size_x; x++)
+            {
+                for (int y = 0; y < size_y; y++)
+                {
+                    if (pattern_list.Count != frequency_list.Count)
+                        Debug.LogError("Pattern list and frequency list quantities don't match.");
+
+                    //Get the next id in the grid
+                    int current_id = pattern_grid[x][y];
+
+                    if(current_id == -1)
+                    {
+                        Debug.Log("Pattern not found. Index of -1");
+                    }
+                    else if (current_id == pattern_list.Count)
+                    {
+                        pattern_list.Add()
+                    }
+                    for (int i = 0; i < unique_patterns.Count; i++)
+                        
+
+                    //If this condition is true it means that the current pattern
+                    //Is unique and must add it to the unique pattern list
+                    if (unique_id == unique_patterns.Count)
+                    {
+                        int[][] new_pattern = new int[pattern_size][];
+                        for (int i = 0; i < pattern_size; i++)
+                            new_pattern[i] = new int[pattern_size];
+
+                        for (int o = 0; o < pattern_size; o++)
+                            for (int i = 0; i < pattern_size; i++)
+                                new_pattern[i][o] = current_pattern[i][o];
+                        unique_patterns.Add(new_pattern);
+                    }
+
+                    //Finally modify the pattern array to contain the indexes of the patterns
+                    result[x][y] = unique_id;
+
+                }
+            }
+
+            //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
+            return (result);
+        }
         public static int[][] GetPatternArray(int[][] offset, int pattern_size)
         {
 
