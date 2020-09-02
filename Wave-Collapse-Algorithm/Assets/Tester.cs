@@ -23,7 +23,7 @@ public class Tester : MonoBehaviour
         offset = ReadInput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
         pattern = ReadInput.GetPatternArray(offset, pattern_size);
-        Debug.Log("<color=yellow> Pattern grid output: \n</color> " + ReadArray(pattern));
+        Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArray(pattern));
         Debug.Log("Finished test routine.");
         yield break;
     }

@@ -10,6 +10,7 @@ namespace WaveFunctionCollapse
         #region Pattern
         public static int[][] GetPatternArray(int[][] offset, int pattern_size)
         {
+
             //Get sizes and setup result array
             int size_x = offset.Length;
             int size_y = offset[0].Length;
@@ -33,6 +34,7 @@ namespace WaveFunctionCollapse
             {
                 for (int y = 0; y < size_y; y++)
                 {
+                    bool is_out_of_bounds = false;
                     //Get the next pattern if not out of bounds
                     if (x + pattern_size - 1 < size_x && y + pattern_size - 1 < size_y)
                     {
@@ -43,35 +45,42 @@ namespace WaveFunctionCollapse
                                 current_pattern[a][b] = result[x + a][y + b];
                             }
                         }
+                    } else
+                    {
+                        is_out_of_bounds = true;
                     }
 
-                    //Compare it to other patterns in the unique pattern list
-                    int unique_id = unique_patterns.Count;
-                    for (int i = 0; i < unique_patterns.Count; i++)
-                        if (CompareArrays(unique_patterns[i],current_pattern))
+                    if (!is_out_of_bounds)
+                    {
+                        //Compare it to other patterns in the unique pattern list
+                        int unique_id = unique_patterns.Count;
+                        for (int i = 0; i < unique_patterns.Count; i++)
+                            if (CompareArrays(unique_patterns[i], current_pattern))
+                            {
+                                unique_id = i;
+                                i = unique_patterns.Count;
+                            }
+
+                        //If this condition is true it means that the current pattern
+                        //Is unique and must add it to the unique pattern list
+                        if (unique_id == unique_patterns.Count)
                         {
-                            unique_id = i;
-                            i = unique_patterns.Count;
+                            int[][] new_pattern = new int[pattern_size][];
+                            for (int i = 0; i < pattern_size; i++)
+                                new_pattern[i] = new int[pattern_size];
+
+                            for (int o = 0; o < pattern_size; o++)
+                                for (int i = 0; i < pattern_size; i++)
+                                    new_pattern[i][o] = current_pattern[i][o];
+                            unique_patterns.Add(new_pattern);
                         }
 
-
-                    //If this condition is true it means that the current pattern
-                    //Is unique and must add it to the unique pattern list
-                    if (unique_id == unique_patterns.Count)
+                        //Finally modify the pattern array to contain the indexes of the patterns
+                        result[x][y] = unique_id;
+                    } else
                     {
-                        int[][] new_pattern = new int[pattern_size][];
-                        for (int i = 0; i < pattern_size; i++)
-                            new_pattern[i] = new int[pattern_size];
-
-                        for (int o = 0; o < pattern_size; o++)
-                            for (int i = 0; i < pattern_size; i++)
-                                new_pattern[i][o] = current_pattern[i][o];
-                        unique_patterns.Add(new_pattern);
+                        result[x][y] = -1;
                     }
-
-                    //Finally modify the pattern array to contain the indexes of the patterns
-                    result[x][y] = unique_id;
-
                 }
             }
 
