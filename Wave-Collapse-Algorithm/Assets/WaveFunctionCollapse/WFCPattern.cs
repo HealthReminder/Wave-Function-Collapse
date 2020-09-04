@@ -2,9 +2,47 @@
 using UnityEngine;
 namespace WaveFunctionCollapse
 {
+    public class Pattern
+    {
+        //The indexes of the cells of the modified grid 
+        //That compose the pattern with set size
+        public int[][] values;
+        //Amount of times this pattern appears in the input
+        public int frequency;
+        //Sides from up and clockwise (length 4)
+        public float[][] sides;
+        //Neighbors from north and clockwise (length 4)
+        public List<int>[] possible_neighbors;
+
+        public string GetValues()
+        {
+            string log = "";
+            if (values == null)
+                return ("NULL PATTERN VALUES");
+            else
+            {
+                int s = values.Length;
+                for (int y = 0; y < s; y++)
+                {
+                    for (int x = 0; x < s; x++)
+                    {
+                        log += values[x][y];
+                    }
+                    log += "\n";
+
+                }
+            }
+            return log;
+        }
+        public string GetFrequency()
+        {
+            return (frequency.ToString());
+        }
+    }
     public static class WFCPattern
     {
-        public static (int[][] pattern_array, List<int[][]> pattern_list, List<int> frequency_list) GetPatternInformation(int[][] offset, int pattern_size)
+
+        public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternInformation(int[][] offset, int pattern_size)
         {
             //Get sizes and setup result array
             int size_x = offset.Length;
@@ -18,8 +56,7 @@ namespace WaveFunctionCollapse
                     pattern_array[x][y] = offset[x][y];
 
             //This array is used to store the unique pattern indexes
-            List<int[][]> pattern_list = new List<int[][]>();
-            List<int> frequency_list = new List<int>();
+            List<Pattern> pattern_list = new List<Pattern>();
 
             //This array will contain the indexes of the patterns each cell belongs to
             int[][] current_pattern = new int[pattern_size][];
@@ -54,10 +91,10 @@ namespace WaveFunctionCollapse
                         //Compare it to other patterns in the unique pattern list
                         int unique_id = pattern_list.Count;
                         for (int i = 0; i < pattern_list.Count; i++)
-                            if (CompareArrays(pattern_list[i], current_pattern))
+                            if (CompareArrays(pattern_list[i].values, current_pattern))
                             {
                                 //Debug.Log(current_pattern[0][0] + "|" + current_pattern[1][0]);
-                                frequency_list[i]++;
+                                pattern_list[i].frequency++;
                                 unique_id = i;
                                 i = pattern_list.Count;
                             }
@@ -67,15 +104,17 @@ namespace WaveFunctionCollapse
                         if (unique_id == pattern_list.Count)
                         {
                             //Instantiate new pattern
-                            int[][] new_pattern = new int[pattern_size][];
+                            Pattern new_pattern = new Pattern();
+                            new_pattern.values = new int[pattern_size][];
                             for (int i = 0; i < pattern_size; i++)
-                                new_pattern[i] = new int[pattern_size];
+                                new_pattern.values[i] = new int[pattern_size];
+
                             for (int o = 0; o < pattern_size; o++)
                                 for (int i = 0; i < pattern_size; i++)
-                                    new_pattern[i][o] = current_pattern[i][o];
+                                    new_pattern.values[i][o] = current_pattern[i][o];
                             //Create an instance in pattern list and set frequency
+                            new_pattern.frequency = 1;
                             pattern_list.Add(new_pattern);
-                            frequency_list.Add(1);
                         }
                         //Finally modify the pattern array to contain the indexes of the patterns
                         pattern_array[x][y] = unique_id;
@@ -87,11 +126,8 @@ namespace WaveFunctionCollapse
                 }
             }
 
-            if (pattern_list.Count != frequency_list.Count)
-                Debug.LogError("Pattern list and frequency list counts does not match.");
-
             //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
-            return (pattern_array, pattern_list, frequency_list);
+            return (pattern_array, pattern_list);
         }
         static bool CompareArrays(int[][] a, int[][] b)
         {

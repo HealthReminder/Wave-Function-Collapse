@@ -10,8 +10,9 @@ public class Tester : MonoBehaviour
     int[][] input;
     int[][] offset;
     int[][] pattern;
-    List<int[][]> unique;
-    List<int> frequencies;
+    List<Pattern> unique;
+    List<int>[][] collapsing_array;
+
     private void Start()
     {
         StartCoroutine(Test());
@@ -23,16 +24,46 @@ public class Tester : MonoBehaviour
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
         offset = WFCInput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
+
+
         var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
         pattern = pattern_info.pattern_array;
         Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArray(pattern));
         unique = pattern_info.pattern_list;
-        Debug.Log("<color=orange> Unique patterns list: \n</color> " + ReadArrayList(unique));
-        frequencies = pattern_info.frequency_list;
-        Debug.Log("<color=orange> Unique patterns list: \n</color> " + ReadList(frequencies));
+
+        string log = "";
+        for (int i = 0; i < unique.Count; i++)
+            log += unique[i].GetValues() + "\n";
+        Debug.Log("<color=orange> Unique patterns list: \n</color> " + log);
+        log = "";
+        for (int i = 0; i < unique.Count; i++)
+            log += unique[i].GetFrequency() + "\n";
+        Debug.Log("<color=orange> Unique patterns list: \n</color> " + log);
 
 
+        yield return CollapseArray(12, unique);
         Debug.Log("Finished test routine.");
+        yield break;
+    }
+    IEnumerator CollapseArray (int output_size, List<Pattern> all_patterns)
+    {
+        yield break;
+        //Setup useful lists and variables
+        List<Vector2> infinite_cells = new List<Vector2>();
+        int qtd_patterns = all_patterns.Count;
+        //Setup the resulting array
+        //Flag initial cells as cells with infinite possibilities
+        collapsing_array = new List<int>[output_size][];
+        for (int i = 0; i < output_size; i++)
+        {
+            collapsing_array[i] = new List<int>[output_size];
+            for (int o = 0; o < output_size; o++)
+            {
+                collapsing_array[o][i] = new List<int>();
+                infinite_cells.Add(new Vector2(o, i));
+            }
+        }
+        
         yield break;
     }
     #endregion
