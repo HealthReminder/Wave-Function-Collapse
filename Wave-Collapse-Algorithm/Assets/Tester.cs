@@ -34,20 +34,29 @@ public class Tester : MonoBehaviour
         string log = "";
         for (int i = 0; i < unique.Count; i++)
             log += unique[i].GetValues() + "\n";
-        Debug.Log("<color=orange> Unique patterns list: \n</color> " + log);
+        Debug.Log("<color=orange> Unique patterns: \n</color> " + log);
+
         log = "";
         for (int i = 0; i < unique.Count; i++)
             log += unique[i].GetFrequency() + "\n";
-        Debug.Log("<color=orange> Unique patterns list: \n</color> " + log);
+        Debug.Log("<color=red> Frequency of unique patterns: \n</color> " + log);
+
+        log = "";
+        for (int i = 0; i < unique.Count; i++)
+            log += unique[i].GetSides() + "\n";
+        Debug.Log("<color=red> Sides of unique patterns: \n</color> " + log);
 
 
-        yield return CollapseArray(12, unique);
+        //yield return CollapseArray(12, unique);
         Debug.Log("Finished test routine.");
         yield break;
     }
     IEnumerator CollapseArray (int output_size, List<Pattern> all_patterns)
     {
-        yield break;
+        if (all_patterns == null)
+            Debug.LogError("Cannot collapse array with null patterns.");
+        else if (all_patterns.Count <= 0)
+            Debug.LogError("Cannot collapse array with no patterns.");
         //Setup useful lists and variables
         List<Vector2> infinite_cells = new List<Vector2>();
         int qtd_patterns = all_patterns.Count;
@@ -73,12 +82,10 @@ public class Tester : MonoBehaviour
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
         List<int[]> lists = new List<int[]>();
-        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[6] { 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
-        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
-        lists.Add(new int[6] { 8, 8, 8, 8, 8, 8 });
+        lists.Add(new int[4] { 1, 2, 1, 2 });
+        lists.Add(new int[4] { 4, 3, 4, 3});
+        lists.Add(new int[4] { 1, 2, 1, 2 });
+        lists.Add(new int[4] { 4, 3, 4, 3 });
         result = lists.ToArray();
         return result;
     }

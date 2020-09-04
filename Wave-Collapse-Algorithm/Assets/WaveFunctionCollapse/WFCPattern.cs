@@ -10,7 +10,7 @@ namespace WaveFunctionCollapse
         //Amount of times this pattern appears in the input
         public int frequency;
         //Sides from up and clockwise (length 4)
-        public float[][] sides;
+        public int[][] sides;
         //Neighbors from north and clockwise (length 4)
         public List<int>[] possible_neighbors;
 
@@ -30,6 +30,57 @@ namespace WaveFunctionCollapse
                     }
                     log += "\n";
 
+                }
+            }
+            return log;
+        }
+        public string GetSides()
+        {
+            string log = "";
+            if (sides == null)
+                return ("NULL SIDES");
+            else
+            {
+                for (int i = 0; i < sides.Length; i++)
+                {
+                    for (int o = 0; o < sides[i].Length; o++)
+                    {
+                        log += sides[i][o];
+                    }
+                    log += "\n";
+
+                }
+
+            }
+            return log;
+        }
+        public string GetNeighbors()
+        {
+            string log = "";
+            if (possible_neighbors == null)
+                return ("NO POSSIBLE NEIGHBORS");
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    log += "For side: " + i + "\n";
+                    int[][] l = values;
+                    int s = values.Length;
+
+                    for (int o = 0; o < possible_neighbors[i].Count; o++)
+                    {
+                        for (int y = 0; y < s; y++)
+                        {
+                            for (int x = 0; x < s; x++)
+                            {
+                                log += possible_neighbors[i][o];
+                            }
+                            log += "\n";
+
+                        }
+                        log += "\n";
+
+                    }
                 }
             }
             return log;
@@ -127,7 +178,35 @@ namespace WaveFunctionCollapse
             }
 
             //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
+            pattern_list = FillPatterns(pattern_list);
             return (pattern_array, pattern_list);
+        }
+
+        static List<Pattern> FillPatterns(List<Pattern> pattern_list)
+        {
+            //This function assume that the unique patterns were already cached in the pattern list
+            int pattern_size = pattern_list[0].values.Length;
+            int c = pattern_list.Count;
+            if (pattern_size <= 0)
+                Debug.LogError("Cannot fill patterns with less than one size.");
+            else if (pattern_list == null)
+                Debug.LogError("Cannot fill patterns with null pattern array.");
+            else if (pattern_list.Count <= 0)
+                Debug.LogError("Cannot fill patterns with empty pattern array.");
+
+            //Assign the sides of the pattern to compared later
+            for (int i = 0; i < c; i++)
+                pattern_list[i].sides = GetPatternSides(pattern_list[i]);
+            //Debug.Log("Got pattern sides for pattern: " + patterns[i].DebugGetValues() + " with the resulting of: " + patterns[i].DebugGetSides());
+
+            //Get the neighbors of the patterns
+            //for (int i = 0; i < c; i++)
+                //pattern_list[i].possible_neighbors = GetNeighbors(patterns[i], patterns);
+
+           // for (int i = 0; i < c; i++)
+               //Debug.Log("Logging pattern: " + pattern_list[i].GetValues() + " with sides: " + pattern_list[i].GetSides() + " of neighbors: " + pattern_list[i].GetNeighbors());
+
+            return (pattern_list);
         }
         static bool CompareArrays(int[][] a, int[][] b)
         {
@@ -142,5 +221,51 @@ namespace WaveFunctionCollapse
                         return false;
             return true;
         }
+        static int[][] GetPatternSides(Pattern pat)
+        {
+            //Tested
+            //This variable will store the values of the cells of each of the four sides starting by the top side
+            int[][] result = new int[4][];
+            int size = pat.values.Length;
+
+            List<int> cache = new List<int>();
+
+            //Get up side
+            for (int i = 0; i < size; i++)
+                cache.Add(pat.values[i][0]);
+            result[0] = cache.ToArray();
+
+            //Get right side
+            cache.Clear();
+            for (int i = 0; i < size; i++)
+                cache.Add(pat.values[size - 1][i]);
+            result[1] = cache.ToArray();
+
+            //Get down side
+            cache.Clear();
+            for (int i = 0; i < size; i++)
+                cache.Add(pat.values[i][size - 1]);
+            result[2] = ArrayInvert(cache.ToArray());
+
+            //Get left side
+            cache.Clear();
+            for (int i = 0; i < size; i++)
+                cache.Add(pat.values[0][i]);
+
+            result[3] = ArrayInvert(cache.ToArray());
+
+            return result;
+        }
+        static int[] ArrayInvert(int[] original)
+        {
+            //Tested
+            List<int> result = new List<int>();
+            for (int i = original.Length - 1; i >= 0; i--)
+            {
+                result.Add(original[i]);
+            }
+            return result.ToArray();
+        }
+       
     }
 }
