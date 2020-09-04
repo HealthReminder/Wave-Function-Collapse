@@ -46,6 +46,11 @@ public class Tester : MonoBehaviour
             log += unique[i].GetSides() + "\n";
         Debug.Log("<color=red> Sides of unique patterns: \n</color> " + log);
 
+        log = "";
+        for (int i = 0; i < unique.Count; i++)
+            log += "For pattern \n"+unique[i].GetValues()+"\n"+ unique[i].GetNeighbors(unique) + "\n-----------\n";
+        Debug.Log("<color=red> Neighbors of patterns: </color> " + log + "\n");
+
 
         //yield return CollapseArray(12, unique);
         Debug.Log("Finished test routine.");
