@@ -66,21 +66,12 @@ public class Tester : MonoBehaviour
             Debug.LogError("Cannot collapse array with no patterns.");
 
         //Setup useful lists and variables
-        List<Vector2> infinite_cells = new List<Vector2>();
-        int qtd_patterns = all_patterns.Count;
+        collapsing_array = WFCCollapse.SetupCollapseArray(collapsing_array, output_size);
 
-        //Setup the resulting array
-        //Flag initial cells as cells with infinite possibilities
-        collapsing_array = new List<int>[output_size][];
+        List<Vector2> infinite_cells = new List<Vector2>();
         for (int y = 0; y < output_size; y++)
-        {
-            collapsing_array[y] = new List<int>[output_size];
             for (int x = 0; x < output_size; x++)
-            {
-                collapsing_array[y][x] = new List<int>();
                 infinite_cells.Add(new Vector2(y, x));
-            }
-        }
 
         #region WFC Algorithm
 
@@ -91,9 +82,12 @@ public class Tester : MonoBehaviour
                 initial_x = Random.Range(0, output_size);
             if (initial_y == -1)
                 initial_y = Random.Range(0, output_size);
-            collapsing_array[initial_x][initial_y] = WFCCollapse.SetupHyperposition(all_patterns);
+            collapsing_array[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
             WFCCollapse.CollapseCell(collapsing_array[initial_x][initial_y], all_patterns, initial_pattern);
             Debug.Log("Collapse first cell.");
+        } else
+        {
+            WFCCollapse.CollapseRandomCell(collapsing_array, infinite_cells, all_patterns);
         }
 
         Debug.Log(collapsing_array.Length);
@@ -103,8 +97,22 @@ public class Tester : MonoBehaviour
 
         string log = "";
         log += ReadArrayList(collapsing_array);
-        Debug.Log("<color=cyan> Collapsed list: </color> \n" + log);
+        Debug.Log("<color=cyan> Initial collapse: </color> \n" + log);
 
+        //Loop until no left cells and result is valid
+        bool is_valid = false;
+        while (!is_valid)
+        {
+            for (int t = 0; t < 999; t++)
+            {
+                WFCCollapse.CollapseMostProbable(collapsing_array, infinite_cells, all_patterns);
+                Debug.Log("<color=cyan> " + t + " collapse: </color> \n" + log);
+
+            }
+            //is_valid = CheckValidity(cells, output_size);
+            //Debug.LogWarning("Invalid result. Looping.");
+            yield return null;
+        }
         #endregion
         yield break;
     }
