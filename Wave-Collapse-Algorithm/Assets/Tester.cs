@@ -71,11 +71,15 @@ public class Tester : MonoBehaviour
         List<Vector2> infinite_cells = new List<Vector2>();
         for (int y = 0; y < output_size; y++)
             for (int x = 0; x < output_size; x++)
-                infinite_cells.Add(new Vector2(y, x));
+                infinite_cells.Add(new Vector2(x, y));
 
         #region WFC Algorithm
+        //FOR DEBUG ONLY
+        initial_pattern = -1;
 
-        //Collapse first cell
+        //FIRST CELL COLLAPSE --------------------------------------------------------------------
+        //Store the collapsed cell as coordinates to be removed from the infinite list
+        Vector2 collapsed_cell;
         if (initial_pattern != -1)
         {
             if (initial_x == -1)
@@ -84,21 +88,28 @@ public class Tester : MonoBehaviour
                 initial_y = Random.Range(0, output_size);
             collapsing_array[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
             WFCCollapse.CollapseCell(collapsing_array[initial_x][initial_y], all_patterns, initial_pattern);
-            Debug.Log("Collapse first cell.");
+            //After collapse, remove from infinite list
+            collapsed_cell = new Vector2(initial_x, initial_y);
+            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count+" with a resulting infinite list of length " + infinite_cells.Count);
         } else
         {
-            WFCCollapse.CollapseRandomCell(collapsing_array, infinite_cells, all_patterns);
+            collapsed_cell = WFCCollapse.CollapseRandomCell(collapsing_array, infinite_cells, all_patterns);
         }
 
-        Debug.Log(collapsing_array.Length);
-        Debug.Log(collapsing_array[0].Length);
-        Debug.Log(collapsing_array[0][0].Count);
-
+        //Remove the collapsed cell
+        for (int i = 0; i < infinite_cells.Count; i++)
+            if (infinite_cells[i] == collapsed_cell)
+            {
+                infinite_cells.RemoveAt(i);
+                Debug.Log("Found collapsed cell in infinite list");
+                break;
+            }
 
         string log = "";
         log += ReadArrayList(collapsing_array);
         Debug.Log("<color=cyan> Initial collapse: </color> \n" + log);
 
+        //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
         bool is_valid = false;
         while (!is_valid)

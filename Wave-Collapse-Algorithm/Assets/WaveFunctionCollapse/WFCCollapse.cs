@@ -16,7 +16,7 @@ namespace WaveFunctionCollapse
             else if (possible_patterns.Count == 1)
                 Debug.LogWarning("Should not collapse cell with already one solution");
 
-            if (collapse_into == -1)
+            if (collapse_into != -1)
             {
                 possible_patterns.Clear();
                 possible_patterns.Add(collapse_into);
@@ -80,7 +80,11 @@ namespace WaveFunctionCollapse
                 Debug.LogError("No cell of infinite solutions in list. Cannot collapse.");
             int index = Random.Range(0, hyperstates.Count);
             //Put the random cell in hyperstate and return it
-            arr[(int)hyperstates[index].x][(int)hyperstates[index].y] = GetHyperstate(patterns);
+            int x = (int)hyperstates[index].x; int y = (int)hyperstates[index].y;
+            arr[x][y] = GetHyperstate(patterns);
+            CollapseCell(arr[x][y], patterns);
+            Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
+
             return hyperstates[index];
         }
         public static List<int> GetHyperstate(List<Pattern> patterns)
@@ -112,7 +116,7 @@ namespace WaveFunctionCollapse
             List<int> chosen_cell;
 
             int lowest_entropy = GetLowestEntropy(arr);
-            if (lowest_entropy == 0)
+            if (lowest_entropy == 9999)
             {
                 chosen_coords = CollapseRandomCell(arr, hyperstates, patterns);
             }
@@ -167,7 +171,7 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Cannot calculate lowest entropy of empty array");
 
             int c = arr[0].Length;
-            int lowest_entropy = 0;
+            int lowest_entropy = 9999;
             for (int y = 0; y < c; y++)
                 for (int x = 0; x < c; x++)
 
