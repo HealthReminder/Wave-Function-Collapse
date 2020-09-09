@@ -7,28 +7,29 @@ namespace WaveFunctionCollapse
     {
         //COMECA A TRANSFORMAR ESSA COROTINA NA ROTINA DO TESTER
         //AQUI SO TERA FUNCOES QUE RETORNAM TIPOS E NO ROUTINAS
-        public static void CollapseCell(List<int> possible_patterns, List<Pattern> patterns, int collapse_into = -1)
+        public static void CollapseCell(List<int>[][] arr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
         {
-            if (possible_patterns == null)
+            List<int> cell = arr[(int)coords.x][(int)coords.y];
+            if (cell == null)
                 Debug.LogError("Cannot collapse a non-initialized cell");
-            else if (possible_patterns.Count == 0)
+            else if (cell.Count == 0)
                 Debug.LogError("Cannot collapse a cell with no possible solutions");
-            else if (possible_patterns.Count == 1)
+            else if (cell.Count == 1)
                 Debug.LogWarning("Should not collapse cell with already one solution");
 
             if (collapse_into != -1)
             {
-                possible_patterns.Clear();
-                possible_patterns.Add(collapse_into);
+                cell.Clear();
+                cell.Add(collapse_into);
             }
             else
             {
-                int c = possible_patterns.Count;
+                int c = cell.Count;
                 List<int> r_indexes = new List<int>();
                 int current_pattern;
                 for (int i = 0; i < c; i++)
                 {
-                    current_pattern = possible_patterns[i];
+                    current_pattern = cell[i];
                     for (int o = 0; o < patterns[current_pattern].frequency; o++)
                         r_indexes.Insert(Random.Range(0, r_indexes.Count), current_pattern);
                 }
@@ -40,11 +41,14 @@ namespace WaveFunctionCollapse
 
                 int chosen_solution = r_indexes[Random.Range(0, r_indexes.Count)];
                 //Debug.Log("Collapsed cell into "+chosen_solution);
-                possible_patterns.Clear();
-                possible_patterns.Add(chosen_solution);
+                cell.Clear();
+                cell.Add(chosen_solution);
                 //Debug.Log("Collapsed cell");
 
             }
+            
+            //Propagate to neihgbors
+            Propagate(arr, patterns, coords);
         }
         public static List<int>[][] SetupCollapseArray(List<int>[][] arr, int s)
         {
@@ -82,7 +86,7 @@ namespace WaveFunctionCollapse
             //Put the random cell in hyperstate and return it
             int x = (int)hyperstates[index].x; int y = (int)hyperstates[index].y;
             arr[x][y] = GetHyperstate(patterns);
-            CollapseCell(arr[x][y], patterns);
+            CollapseCell(arr,hyperstates[index], patterns);
             //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
 
             return hyperstates[index];
@@ -131,13 +135,16 @@ namespace WaveFunctionCollapse
                 chosen_coords = possible_cells[Random.Range(0, possible_cells.Count)];
             }
             chosen_cell = arr[(int)chosen_coords.x][(int)chosen_coords.y];
-            //Debug.Log("Chosen cell " + chosen_cell[0] + " within cells of entropy of " + lowest_entropy);
+            Debug.Log("Chosen cell " + chosen_cell[0] + " within cells of entropy of " + lowest_entropy);
             //Debug.Log(chosen_cell);
             //Debug.Log(patterns[chosen_cell.possible_patterns[0]].DebugGetNeighbors());
-            CollapseCell(chosen_cell, patterns, chosen_cell[Random.Range(0, chosen_cell.Count)]);
+            CollapseCell(arr,chosen_coords, patterns, chosen_cell[Random.Range(0, chosen_cell.Count)]);
             //Debug.Log(DebugCells(cells));
             //Debug.log(cells, false);
             //Before propagation get valid neighbors
+<<<<<<< HEAD
+
+=======
             List<int> north, east, south, west;
             north = east = south = west = null;
             //You can only propagate cells that exist obviously
@@ -152,9 +159,17 @@ namespace WaveFunctionCollapse
             if (chosen_coords.x - 1 >= 0)
                 west = arr[cx - 1][cy];
             //Propagate to neihgbors
-            Propagate(chosen_cell, patterns, north, east, south, west);
+            //Propagate(chosen_cell, patterns, north, east, south, west);
+>>>>>>> parent of 71a1766... Early propagation
             //Debug.Log(DebugCells(cells));
             //Debug.Log(DebugCells(cells, false));
+            //Scout the infinite list to remove extra coordinates
+            for (int i = 0; i < hyperstates.Count; i++)
+                if(hyperstates[i] == chosen_coords)
+                {
+                    hyperstates.RemoveAt(i);
+                    break;
+                }
             return chosen_coords;
         }
 
@@ -183,27 +198,61 @@ namespace WaveFunctionCollapse
 
             return lowest_entropy;
         }
-        static void Propagate(List<int> cell, List<Pattern> patterns, List<int> top = null, List<int> right = null, List<int> bottom = null, List<int> left = null)
+<<<<<<< HEAD
+        static void Propagate(List<int>[][] arr, List<Pattern> patterns, Vector2 main_coord)
         {
-            if(cell != null)
+            List<int> cell = arr[(int)main_coord.x][(int)main_coord.y];
+            if (cell != null)
                 if (cell.Count > 1)
                     Debug.LogWarning("Propagating cell with more than one solution: " + cell.Count);
 
+            //Get possible neighbors
+            List<int>[] neighbors = new List<int>[4];
+            neighbors[0] = neighbors[1] = neighbors[2] = neighbors[3] = null;
+            Vector2[] neighbors_coords = new Vector2[4];
+            //You can only propagate cells that exist obviously
+            int cx, cy;
+            cx = (int)main_coord.x; cy = (int)main_coord.y;
+            if (main_coord.y - 1 >= 0) { 
+                neighbors[0] = arr[cx][cy - 1];
+                neighbors_coords[0] = new Vector2(cx, cy - 1);
+                }
+            if (main_coord.x + 1 < arr.Length)
+            {
+                neighbors[1] = arr[cx + 1][cy];
+                neighbors_coords[1] = new Vector2(cx + 1, cy);
+
+            }
+            if (main_coord.y + 1 < arr[0].Length)
+            {
+                neighbors[2] = arr[cx][cy + 1];
+                neighbors_coords[2] = new Vector2(cx, cy + 1);
+
+            }
+            if (main_coord.x - 1 >= 0)
+            {
+                neighbors[3] = arr[cx - 1][cy];
+                neighbors_coords[3] = new Vector2(cx - 1, cy);
+
+            }
+
             //Setup infinite neighbors
-            if (top != null)
-                if (top == null)
-                    top = GetHyperstate(patterns);
-            if (right != null)
-                if (right == null)
-                    right = GetHyperstate(patterns);
-            if (bottom != null)
-                if (bottom == null)
-                    bottom = GetHyperstate(patterns); 
-            if (left != null)
-                if (left == null)
-                    left = GetHyperstate(patterns);
+            if (neighbors[0] != null)
+                if (neighbors[0] == null)
+                    neighbors[0] = GetHyperstate(patterns);
+            if (neighbors[1] != null)
+                if (neighbors[1] == null)
+                    neighbors[1] = GetHyperstate(patterns);
+            if (neighbors[2] != null)
+                if (neighbors[2] == null)
+                    neighbors[2] = GetHyperstate(patterns); 
+            if (neighbors[3] != null)
+                if (neighbors[3] == null)
+                    neighbors[3] = GetHyperstate(patterns);
 
             //All the neighbors of the main cell will be restricted to its possible neighbors.
+            //For the neighbors that collapse in consequence of propagation, collapse it to propagate it again
+            List<Vector2> consequently_collapsed = new List<Vector2>();
             for (int i = 0; i < cell.Count; i++)
             {
                 //Debug.Log("There is "+patterns.Count+" existing patterns");
@@ -211,28 +260,25 @@ namespace WaveFunctionCollapse
 
                 List<int>[] n = patterns[cell[i]].possible_neighbors;
 
-                if (top != null)
-                    if (top.Count != 1)
-                        for (int o = 0; o < n[0].Count; o++)
-                            top.Add(n[0][o]);
-
-                if (right != null)
-                    if (right.Count != 1)
-                        for (int o = 0; o < n[1].Count; o++)
-                            right.Add(n[1][o]);
-
-                if (bottom != null)
-                    if (bottom.Count != 1)
-                        for (int o = 0; o < n[2].Count; o++)
-                            bottom.Add(n[2][o]);
-
-                if (left != null)
-                    if (left.Count != 1)
-                        for (int o = 0; o < n[3].Count; o++)
-                            left.Add(n[3][o]);
-
+                for (int s = 0; s < 4; s++)
+                {
+                    if (neighbors[s] != null)
+                    {
+                        if (neighbors[s].Count != 1)
+                            for (int o = 0; o < n[0].Count; o++)
+                                neighbors[s].Add(n[0][o]);
+                        if (neighbors[s].Count == 1)
+                            consequently_collapsed.Add(neighbors_coords[s]);
+                    }
+                }
             }
-            //Debug.Log("Finished propagating");
+            Debug.Log(consequently_collapsed.Count + " neighbors affected.");
+            for (int i = 0; i < consequently_collapsed.Count; i++)
+            {
+                CollapseCell(arr, consequently_collapsed[i],patterns);
+            }
         }
+=======
+>>>>>>> parent of 71a1766... Early propagation
     }
 }
