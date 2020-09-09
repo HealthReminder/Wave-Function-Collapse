@@ -83,7 +83,7 @@ namespace WaveFunctionCollapse
             int x = (int)hyperstates[index].x; int y = (int)hyperstates[index].y;
             arr[x][y] = GetHyperstate(patterns);
             CollapseCell(arr[x][y], patterns);
-            Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
+            //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
 
             return hyperstates[index];
         }
@@ -95,7 +95,7 @@ namespace WaveFunctionCollapse
             return p;
         }
 
-        public static void CollapseMostProbable(List<int>[][] arr, List<Vector2> hyperstates, List<Pattern> patterns)
+        public static Vector2 CollapseMostProbable(List<int>[][] arr, List<Vector2> hyperstates, List<Pattern> patterns)
         {
             if (arr == null)
                 Debug.LogError("Cannot calculate lowest entropy of null array.");
@@ -131,7 +131,7 @@ namespace WaveFunctionCollapse
                 chosen_coords = possible_cells[Random.Range(0, possible_cells.Count)];
             }
             chosen_cell = arr[(int)chosen_coords.x][(int)chosen_coords.y];
-            //Debug.Log("Chosen cell " + chosen_cell + " within cells of entropy of " + lowest_entropy);
+            //Debug.Log("Chosen cell " + chosen_cell[0] + " within cells of entropy of " + lowest_entropy);
             //Debug.Log(chosen_cell);
             //Debug.Log(patterns[chosen_cell.possible_patterns[0]].DebugGetNeighbors());
             CollapseCell(chosen_cell, patterns, chosen_cell[Random.Range(0, chosen_cell.Count)]);
@@ -155,6 +155,7 @@ namespace WaveFunctionCollapse
             //Propagate(chosen_cell, patterns, north, east, south, west);
             //Debug.Log(DebugCells(cells));
             //Debug.Log(DebugCells(cells, false));
+            return chosen_coords;
         }
 
         static int GetLowestEntropy(List<int>[][] arr)

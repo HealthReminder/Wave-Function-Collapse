@@ -101,7 +101,7 @@ public class Tester : MonoBehaviour
             if (infinite_cells[i] == collapsed_cell)
             {
                 infinite_cells.RemoveAt(i);
-                Debug.Log("Found collapsed cell in infinite list");
+                //Debug.Log("Found collapsed cell in infinite list");
                 break;
             }
 
@@ -116,16 +116,43 @@ public class Tester : MonoBehaviour
         {
             for (int t = 0; t < 999; t++)
             {
-                WFCCollapse.CollapseMostProbable(collapsing_array, infinite_cells, all_patterns);
+                collapsed_cell = WFCCollapse.CollapseMostProbable(collapsing_array, infinite_cells, all_patterns);
+                //Remove the collapsed cell
+                for (int i = 0; i < infinite_cells.Count; i++)
+                    if (infinite_cells[i] == collapsed_cell)
+                    {
+                        infinite_cells.RemoveAt(i);
+                        //Debug.Log("Found collapsed cell in infinite list");
+                        break;
+                    }
+                log = "";
+                log += ReadArrayList(collapsing_array);
                 Debug.Log("<color=cyan> " + t + " collapse: </color> \n" + log);
-
+                if (CheckValidity(collapsing_array, output_size))
+                    t = 9999;
             }
-            //is_valid = CheckValidity(cells, output_size);
+            is_valid = CheckValidity(collapsing_array, output_size);
             //Debug.LogWarning("Invalid result. Looping.");
             yield return null;
         }
         #endregion
         yield break;
+    }
+    bool CheckValidity(List<int>[][] cells, int length)
+    {
+        for (int y = 0; y < length; y++)
+        {
+            for (int x = 0; x < length; x++)
+            {
+                if (cells[x][y] == null)
+                    return false;
+                else if (cells[x][y] == null)
+                    return false;
+                else if (cells[x][y].Count != 1)
+                    return false;
+            }
+        }
+        return true;
     }
     #endregion
     #region Input
