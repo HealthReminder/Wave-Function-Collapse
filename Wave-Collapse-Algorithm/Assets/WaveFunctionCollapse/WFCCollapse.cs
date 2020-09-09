@@ -152,7 +152,7 @@ namespace WaveFunctionCollapse
             if (chosen_coords.x - 1 >= 0)
                 west = arr[cx - 1][cy];
             //Propagate to neihgbors
-            //Propagate(chosen_cell, patterns, north, east, south, west);
+            Propagate(chosen_cell, patterns, north, east, south, west);
             //Debug.Log(DebugCells(cells));
             //Debug.Log(DebugCells(cells, false));
             return chosen_coords;
@@ -182,6 +182,57 @@ namespace WaveFunctionCollapse
                             lowest_entropy = arr[x][y].Count;
 
             return lowest_entropy;
+        }
+        static void Propagate(List<int> cell, List<Pattern> patterns, List<int> top = null, List<int> right = null, List<int> bottom = null, List<int> left = null)
+        {
+            if(cell != null)
+                if (cell.Count > 1)
+                    Debug.LogWarning("Propagating cell with more than one solution: " + cell.Count);
+
+            //Setup infinite neighbors
+            if (top != null)
+                if (top == null)
+                    top = GetHyperstate(patterns);
+            if (right != null)
+                if (right == null)
+                    right = GetHyperstate(patterns);
+            if (bottom != null)
+                if (bottom == null)
+                    bottom = GetHyperstate(patterns); 
+            if (left != null)
+                if (left == null)
+                    left = GetHyperstate(patterns);
+
+            //All the neighbors of the main cell will be restricted to its possible neighbors.
+            for (int i = 0; i < cell.Count; i++)
+            {
+                //Debug.Log("There is "+patterns.Count+" existing patterns");
+                //Debug.Log("Cell pattern "+i+" is: "+cell.possible_patterns[i]); 
+
+                List<int>[] n = patterns[cell[i]].possible_neighbors;
+
+                if (top != null)
+                    if (top.Count != 1)
+                        for (int o = 0; o < n[0].Count; o++)
+                            top.Add(n[0][o]);
+
+                if (right != null)
+                    if (right.Count != 1)
+                        for (int o = 0; o < n[1].Count; o++)
+                            right.Add(n[1][o]);
+
+                if (bottom != null)
+                    if (bottom.Count != 1)
+                        for (int o = 0; o < n[2].Count; o++)
+                            bottom.Add(n[2][o]);
+
+                if (left != null)
+                    if (left.Count != 1)
+                        for (int o = 0; o < n[3].Count; o++)
+                            left.Add(n[3][o]);
+
+            }
+            //Debug.Log("Finished propagating");
         }
     }
 }

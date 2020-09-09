@@ -55,6 +55,16 @@ public class Tester : MonoBehaviour
         //Optional parameters to include a preset first cell
         yield return CollapseArray(pattern_size*3, unique, 1);
 
+        log = "";
+        for (int y = 0; y < collapsing_array.Length; y++)
+        {
+            for (int x = 0; x < collapsing_array[0].Length; x++)
+            {
+
+            }
+        }
+        Debug.Log("<color=green> Collapsed grid: </color> " + log);
+
         Debug.Log("Finished test routine.");
         yield break;
     }
@@ -87,9 +97,9 @@ public class Tester : MonoBehaviour
             if (initial_y == -1)
                 initial_y = Random.Range(0, output_size);
             collapsing_array[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
+            collapsed_cell = new Vector2(initial_x, initial_y);
             WFCCollapse.CollapseCell(collapsing_array[initial_x][initial_y], all_patterns, initial_pattern);
             //After collapse, remove from infinite list
-            collapsed_cell = new Vector2(initial_x, initial_y);
             Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count+" with a resulting infinite list of length " + infinite_cells.Count);
         } else
         {
@@ -161,10 +171,10 @@ public class Tester : MonoBehaviour
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
         List<int[]> lists = new List<int[]>();
-        lists.Add(new int[4] { 1, 2, 1, 2 });
-        lists.Add(new int[4] { 4, 3, 4, 3 });
-        lists.Add(new int[4] { 1, 2, 1, 2 });
-        lists.Add(new int[4] { 4, 3, 4, 3 });
+        lists.Add(new int[4] { 0, 0, 0, 0 });
+        lists.Add(new int[4] { 0, 0, 0, 0 });
+        lists.Add(new int[4] { 1, 1, 1, 1 });
+        lists.Add(new int[4] { 1, 1, 1, 1 });
         result = lists.ToArray();
         return result;
     }
