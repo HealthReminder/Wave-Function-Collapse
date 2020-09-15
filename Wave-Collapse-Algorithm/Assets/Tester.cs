@@ -11,7 +11,9 @@ public class Tester : MonoBehaviour
     int[][] offset;
     int[][] pattern;
     List<Pattern> unique;
-    List<int>[][] collapsing_array;
+    List<int>[][] collapsing;
+    int[][] entropy;
+
 
     private void Start()
     {
@@ -60,88 +62,100 @@ public class Tester : MonoBehaviour
     }
     IEnumerator CollapseArray(int output_size, List<Pattern> all_patterns, int initial_pattern = -1, int initial_x = -1, int initial_y = -1)
     {
+        //Setup useful lists and variables
+        SetupCollapseArrays(output_size);
+
         if (all_patterns == null)
             Debug.LogError("Cannot collapse array with null patterns.");
         else if (all_patterns.Count <= 0)
             Debug.LogError("Cannot collapse array with no patterns.");
+        else if (output_size <= 0)
+            Debug.LogError("Cannot output array of invalid size.");
+        else if (collapsing == null)
+            Debug.LogError("Cannot collapse null collapsing array.");
+        else if (entropy == null)
+            Debug.LogError("Cannot collapse null entropy array.");
 
-        //Setup useful lists and variables
-        collapsing_array = WFCCollapse.SetupCollapseArray(collapsing_array, output_size);
-
-        List<Vector2> infinite_cells = new List<Vector2>();
-        for (int y = 0; y < output_size; y++)
-            for (int x = 0; x < output_size; x++)
-                infinite_cells.Add(new Vector2(x, y));
 
         #region WFC Algorithm
         //FOR DEBUG ONLY
         initial_pattern = -1;
 
+        Vector2 collapsed_cell = Vector2.zero;
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
-        //Store the collapsed cell as coordinates to be removed from the infinite list
-        Vector2 collapsed_cell;
         if (initial_pattern != -1)
         {
             if (initial_x == -1)
                 initial_x = Random.Range(0, output_size);
             if (initial_y == -1)
                 initial_y = Random.Range(0, output_size);
-            collapsing_array[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
-<<<<<<< HEAD
-            collapsed_cell = new Vector2(initial_x, initial_y);
-            WFCCollapse.CollapseCell(collapsing_array, collapsed_cell, all_patterns, initial_pattern);
-=======
-            WFCCollapse.CollapseCell(collapsing_array[initial_x][initial_y], all_patterns, initial_pattern);
->>>>>>> parent of 71a1766... Early propagation
+            Vector2 v = new Vector2(initial_x, initial_y);
+            collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
+            WFCCollapse.CollapseCell(collapsing, entropy, v, all_patterns, initial_pattern);
             //After collapse, remove from infinite list
             collapsed_cell = new Vector2(initial_x, initial_y);
-            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count+" with a resulting infinite list of length " + infinite_cells.Count);
+            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count);
         } else
         {
-            collapsed_cell = WFCCollapse.CollapseRandomCell(collapsing_array, infinite_cells, all_patterns);
+            collapsed_cell = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
         }
-
         //Remove the collapsed cell
-        for (int i = 0; i < infinite_cells.Count; i++)
-            if (infinite_cells[i] == collapsed_cell)
-            {
-                infinite_cells.RemoveAt(i);
-                //Debug.Log("Found collapsed cell in infinite list");
-                break;
-            }
+        //for (int i = 0; i < infinite_cells.Count; i++)
+            //if (infinite_cells[i] == collapsed_cell)
+            //{
+            //    infinite_cells.RemoveAt(i);
+            //    Debug.Log("Found collapsed cell in infinite list");
+            //    break;
+            //}
 
-        string log = "";
-        log += ReadArrayList(collapsing_array);
+        string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial collapse: </color> \n" + log);
+
+        log = ReadArray(entropy);
+        Debug.Log("<color=blue> Initial collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
+        yield break;
         bool is_valid = false;
         while (!is_valid)
         {
             for (int t = 0; t < 999; t++)
             {
-                collapsed_cell = WFCCollapse.CollapseMostProbable(collapsing_array, infinite_cells, all_patterns);
-                //Remove the collapsed cell
-                for (int i = 0; i < infinite_cells.Count; i++)
-                    if (infinite_cells[i] == collapsed_cell)
-                    {
-                        infinite_cells.RemoveAt(i);
-                        //Debug.Log("Found collapsed cell in infinite list");
-                        break;
-                    }
-                log = "";
-                log += ReadArrayList(collapsing_array);
+                WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
+                log = ReadArrayList(collapsing);
                 Debug.Log("<color=cyan> " + t + " collapse: </color> \n" + log);
-                if (CheckValidity(collapsing_array, output_size))
-                    t = 9999;
+                log = ReadArray(entropy);
+                Debug.Log("<color=blue> Initial collapse: </color> \n" + log);
+
             }
-            is_valid = CheckValidity(collapsing_array, output_size);
+            is_valid = CheckValidity(collapsing, output_size);
             //Debug.LogWarning("Invalid result. Looping.");
             yield return null;
         }
         #endregion
         yield break;
+    }
+    void SetupCollapseArrays(int s)
+    {
+        collapsing = new List<int>[s][];
+        for (int y = 0; y < s; y++)
+        {
+            collapsing[y] = new List<int>[s];
+            for (int x = 0; x < s; x++)
+                collapsing[y][x] = new List<int>();
+
+        }
+        entropy = new int[s][];
+        for (int i = 0; i < s; i++)
+        {
+            entropy[i] = new int[s];
+            for (int o = 0; o < s; o++)
+            {
+                entropy[i][o] = 0;
+            }
+        }
+
     }
     bool CheckValidity(List<int>[][] cells, int length)
     {
@@ -166,10 +180,10 @@ public class Tester : MonoBehaviour
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
         List<int[]> lists = new List<int[]>();
-        lists.Add(new int[4] { 1, 2, 1, 2 });
-        lists.Add(new int[4] { 4, 3, 4, 3 });
-        lists.Add(new int[4] { 1, 2, 1, 2 });
-        lists.Add(new int[4] { 4, 3, 4, 3 });
+        lists.Add(new int[4] { 0, 0, 0, 0 });
+        lists.Add(new int[4] { 0, 0, 0, 0 });
+        lists.Add(new int[4] { 1, 1, 1, 1 });
+        lists.Add(new int[4] { 0, 0, 0, 0 });
         result = lists.ToArray();
         return result;
     }
@@ -197,7 +211,7 @@ public class Tester : MonoBehaviour
                     log += "O";
                 else if (arraylist[y][x].Count == 1)
                     log += arraylist[y][x][0];
-                }
+            }
             log += "\n";
         }
         return log;

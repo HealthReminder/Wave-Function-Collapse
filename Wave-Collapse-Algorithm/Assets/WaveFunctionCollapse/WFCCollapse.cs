@@ -1,15 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace WaveFunctionCollapse
+
 {
     public static class WFCCollapse
     {
         //COMECA A TRANSFORMAR ESSA COROTINA NA ROTINA DO TESTER
         //AQUI SO TERA FUNCOES QUE RETORNAM TIPOS E NO ROUTINAS
-        public static void CollapseCell(List<int>[][] arr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
+        public static void CollapseCell(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
         {
-            List<int> cell = arr[(int)coords.x][(int)coords.y];
+            List<int> cell = coll[(int)coords.x][(int)coords.y];
             if (cell == null)
                 Debug.LogError("Cannot collapse a non-initialized cell");
             else if (cell.Count == 0)
@@ -40,56 +42,169 @@ namespace WaveFunctionCollapse
                 //Debug.Log(log);
 
                 int chosen_solution = r_indexes[Random.Range(0, r_indexes.Count)];
-                //Debug.Log("Collapsed cell into "+chosen_solution);
                 cell.Clear();
                 cell.Add(chosen_solution);
-                //Debug.Log("Collapsed cell");
+                entr[(int)coords.x][(int)coords.y] = -1;
+                //Debug.Log("Collapsed cell into "+chosen_solution);
 
             }
-            
+
             //Propagate to neihgbors
-            Propagate(arr, patterns, coords);
+            Propagate(coll, entr, coords, patterns);
         }
-        public static List<int>[][] SetupCollapseArray(List<int>[][] arr, int s)
+        public static Vector2 CollapseHyperCell(List<int>[][] coll, int[][] entr, List<Pattern> patterns)
         {
-            //This function sets up the resulting array, the initial cells and
-            //Return a list of coords in the grid
-            //Each cell points to with infinite possibilities
-            arr = new List<int>[s][];
-            for (int y = 0; y < s; y++)
-            {
-                arr[y] = new List<int>[s];
-                for (int x = 0; x < s; x++)
-                    arr[y][x] = new List<int>();
-                
-            }
-            /* List<Vector2> coords = new List<Vector2>();
-            arr = new List<int>[s][];
-            for (int x = 0; x < s; x++)
-            {
-                arr[x] = new List<int>[s];
-                for (int y = 0; y < s; y++)
-                {
-                    arr[x][y] = new List<int>();
-                    coords.Add(new Vector2(x, y));
-                }
-            }*/
-            return arr;
-        }
-        public static Vector2 CollapseRandomCell(List<int>[][] arr, List<Vector2> hyperstates, List<Pattern> patterns)
-        {
-            //If this condition is met it means that no cells were instantiated yet
-            //Ideally this should be called only once
+            //This function should be called only once, ideally
+            //Get a list of hyper cells
+            List<Vector2> hyperstates = new List<Vector2>();
+            for (int y = 0; y < entr.Length; y++)
+                for (int x = 0; x < entr[0].Length; x++)
+                    if(entr[x][y] == 0)
+                        hyperstates.Add(new Vector2(x, y));
             if (hyperstates.Count <= 0)
                 Debug.LogError("No cell of infinite solutions in list. Cannot collapse.");
-            int index = Random.Range(0, hyperstates.Count);
-            //Put the random cell in hyperstate and return it
-            int x = (int)hyperstates[index].x; int y = (int)hyperstates[index].y;
-            arr[x][y] = GetHyperstate(patterns);
-            CollapseCell(arr,hyperstates[index], patterns);
-            //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
 
+            //Get a random hyper cell and collapse it.
+            int index = Random.Range(0, hyperstates.Count);
+            int i = (int)hyperstates[index].x; int o = (int)hyperstates[index].y;
+            coll[i][o] = GetHyperstate(patterns);
+            CollapseCell(coll,entr, new Vector2(i,o), patterns);
+
+            //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
             return hyperstates[index];
+        }
+        public static void CollapseMostProbable(List<int>[][] coll, int[][] entr, List<Pattern> patterns)
+        {
+            if (coll == null)
+                Debug.LogError("Cannot calculate lowest entropy of null array.");
+            else if (coll[0] == null)
+                Debug.LogError("Cannot calculate lowest entropy of null rows.");
+            else if (coll[0][0] == null)
+                Debug.LogError("Cannot calculate lowest entropy of null columns.");
+            else if (coll.Length <= 0 || coll[0].Length <= 0)
+                Debug.LogError("Cannot calculate lowest entropy of empty array,");
+            //else if (hyperstates == null)
+            //    Debug.LogError("Cannot collapse most probable cell using null hyperstates list.");
+            else if (patterns == null)
+                Debug.LogError("Cannot collapse most probable cell using null pattern list.");
+
+            //Get a list of hyper cells
+            List<Vector2> hyperstates = new List<Vector2>();
+            for (int y = 0; y < entr.Length; y++)
+                for (int x = 0; x < entr[0].Length; x++)
+                    if (entr[x][y] == 0)
+                        hyperstates.Add(new Vector2(x, y));
+
+            int s = coll.Length;
+            //Store the most probable cell in these
+            Vector2 epicenter_coords = Vector2.zero;
+            List<int> epicenter_cell = new List<int>();
+            List<Vector2> collapsed_cells = new List<Vector2>();
+
+            int lowest_entropy = GetLowestEntropy(coll);
+            if (lowest_entropy == 9999)
+            {
+                collapsed_cells.Clear();
+                collapsed_cells.Add(CollapseHyperCell(coll, entr, patterns));
+            }
+            else
+            {
+                List<Vector2> possible_cells = new List<Vector2>();
+                for (int y = 0; y < s; y++)
+                    for (int x = 0; x < s; x++)
+                        if (coll[x][y] != null)
+                            if (coll[x][y].Count == lowest_entropy)
+                                possible_cells.Add(new Vector2(x, y));
+                //0 will always be the cell in the middle. The others are its neighbors if any
+                collapsed_cells.Clear();
+                collapsed_cells.Add(possible_cells[Random.Range(0, possible_cells.Count)]);
+            }
+            epicenter_coords = collapsed_cells[0];
+            epicenter_cell = coll[(int)epicenter_coords.x][(int)epicenter_coords.y];
+            //Debug.Log("Chosen cell " + chosen_cell + " within cells of entropy of " + lowest_entropy);
+            //Debug.Log(chosen_cell);
+            //Debug.Log(patterns[chosen_cell.possible_patterns[0]].DebugGetNeighbors());
+            CollapseCell(coll, entr, epicenter_coords, patterns, epicenter_cell[Random.Range(0, epicenter_cell.Count)]);
+            //Debug.Log(DebugCells(cells));
+            //Debug.log(cells, false);
+            
+            //Debug.Log(DebugCells(cells));
+            //Debug.Log(DebugCells(cells, false));
+        }
+        static void Propagate(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns)
+        {
+            int cx, cy;
+            cx = (int)coords.x; cy = (int)coords.y;
+            List<int> cell = coll[cx][cy];
+            if (cell != null)
+                if (cell.Count > 1)
+                    Debug.LogWarning("Propagating cell with more than one solution: " + cell.Count);
+
+            //Find neighbors
+            //Before propagation get valid neighbors
+            List<Vector2> neighbors = new List<Vector2>();
+            //You can only propagate cells that exist obviously
+            
+            if (coords.y - 1 >= 0)
+                neighbors.Add(new Vector2(cx,cy - 1));
+            if (coords.x + 1 < coll.Length)
+                neighbors.Add(new Vector2(cx + 1, cy));
+            if (coords.y + 1 < coll[0].Length)
+                neighbors.Add(new Vector2(cx, cy + 1));
+            if (coords.x - 1 >= 0)
+                neighbors.Add(new Vector2(cx - 1, cy));
+
+            for (int i = 0; i < neighbors.Count; i++)
+                if(coll[(int)neighbors[i].x][(int)neighbors[i].y] == null)
+                    coll[(int)neighbors[i].x][(int)neighbors[i].y] = GetHyperstate(patterns);
+
+            //All the neighbors of the main cell will be restricted to its possible neighbors.
+            //This is WRONG
+            for (int i = 0; i < cell.Count; i++)
+            {
+
+                List<int>[] n = patterns[cell[i]].possible_neighbors;
+
+                for (int k = 0; k < neighbors.Count; k++)
+                {
+                    List<int> c = coll[(int)neighbors[k].x][(int)neighbors[k].y];
+                    if (c.Count != 1)
+                            for (int o = 0; o < n[0].Count; o++)
+                                c.Add(n[0][o]);
+                    
+                }
+            }
+            //Update entropy array
+            for (int i = 0; i < neighbors.Count; i++)
+            {
+                int x = (int)neighbors[i].x;
+                int y = (int)neighbors[i].y;
+                //If this neighbor was collapsed make it 999 so it must collapse after
+                if (coll[x][y].Count == 1)
+                    entr[x][y] = 999;
+                else
+                    entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x,y,entr)+1);
+            }
+            //Debug.Log("Finished propagating");
+        }
+        static int GetCollapsedNeighborCount(int x, int y, int[][] entr) 
+        {
+            int count = 0;
+            if (y - 1 >= 0)
+                if (entr[x][y - 1] == -1)
+                    count++;
+            if (x + 1 < entr.Length)
+                if (entr[x + 1][y] == -1)
+                    count++;
+            if (y + 1 < entr[0].Length)
+                if (entr[x][y + 1] == -1)
+                    count++;
+            if (x - 1 >= 0)
+                if (entr[x - 1][y] == -1)
+                    count++;
+
+            Debug.Log("Cell has " + count + "collapsed neighbors");
+            return (count);
         }
         public static List<int> GetHyperstate(List<Pattern> patterns)
         {
@@ -97,80 +212,6 @@ namespace WaveFunctionCollapse
             for (int i = 0; i < patterns.Count; i++)
                 p.Add(i);
             return p;
-        }
-
-        public static Vector2 CollapseMostProbable(List<int>[][] arr, List<Vector2> hyperstates, List<Pattern> patterns)
-        {
-            if (arr == null)
-                Debug.LogError("Cannot calculate lowest entropy of null array.");
-            else if (arr[0] == null)
-                Debug.LogError("Cannot calculate lowest entropy of null rows.");
-            else if (arr[0][0] == null)
-                Debug.LogError("Cannot calculate lowest entropy of null columns.");
-            else if (arr.Length <= 0 || arr[0].Length <= 0)
-                Debug.LogError("Cannot calculate lowest entropy of empty array,");
-            else if (hyperstates == null)
-                Debug.LogError("Cannot collapse most probable cell using null hyperstates list.");
-            else if (patterns == null)
-                Debug.LogError("Cannot collapse most probable cell using null pattern list.");
-
-            int s = arr.Length;
-            //Store the most probable cell in these
-            Vector2 chosen_coords = Vector2.zero;
-            List<int> chosen_cell;
-
-            int lowest_entropy = GetLowestEntropy(arr);
-            if (lowest_entropy == 9999)
-            {
-                chosen_coords = CollapseRandomCell(arr, hyperstates, patterns);
-            }
-            else
-            {
-                List<Vector2> possible_cells = new List<Vector2>();
-                for (int y = 0; y < s; y++)
-                    for (int x = 0; x < s; x++)
-                        if (arr[x][y] != null)
-                            if (arr[x][y].Count == lowest_entropy)
-                                possible_cells.Add(new Vector2(x, y));
-                chosen_coords = possible_cells[Random.Range(0, possible_cells.Count)];
-            }
-            chosen_cell = arr[(int)chosen_coords.x][(int)chosen_coords.y];
-            Debug.Log("Chosen cell " + chosen_cell[0] + " within cells of entropy of " + lowest_entropy);
-            //Debug.Log(chosen_cell);
-            //Debug.Log(patterns[chosen_cell.possible_patterns[0]].DebugGetNeighbors());
-            CollapseCell(arr,chosen_coords, patterns, chosen_cell[Random.Range(0, chosen_cell.Count)]);
-            //Debug.Log(DebugCells(cells));
-            //Debug.log(cells, false);
-            //Before propagation get valid neighbors
-<<<<<<< HEAD
-
-=======
-            List<int> north, east, south, west;
-            north = east = south = west = null;
-            //You can only propagate cells that exist obviously
-            int cx, cy;
-            cx = (int) chosen_coords.x; cy = (int) chosen_coords.y;
-            if (chosen_coords.y - 1 >= 0)
-                north = arr[cx][cy - 1];
-            if (chosen_coords.x + 1 < arr.Length)
-                east = arr[cx + 1][cy];
-            if (chosen_coords.y + 1 < arr[0].Length)
-                south = arr[cx][cy + 1];
-            if (chosen_coords.x - 1 >= 0)
-                west = arr[cx - 1][cy];
-            //Propagate to neihgbors
-            //Propagate(chosen_cell, patterns, north, east, south, west);
->>>>>>> parent of 71a1766... Early propagation
-            //Debug.Log(DebugCells(cells));
-            //Debug.Log(DebugCells(cells, false));
-            //Scout the infinite list to remove extra coordinates
-            for (int i = 0; i < hyperstates.Count; i++)
-                if(hyperstates[i] == chosen_coords)
-                {
-                    hyperstates.RemoveAt(i);
-                    break;
-                }
-            return chosen_coords;
         }
 
         static int GetLowestEntropy(List<int>[][] arr)
@@ -198,87 +239,5 @@ namespace WaveFunctionCollapse
 
             return lowest_entropy;
         }
-<<<<<<< HEAD
-        static void Propagate(List<int>[][] arr, List<Pattern> patterns, Vector2 main_coord)
-        {
-            List<int> cell = arr[(int)main_coord.x][(int)main_coord.y];
-            if (cell != null)
-                if (cell.Count > 1)
-                    Debug.LogWarning("Propagating cell with more than one solution: " + cell.Count);
-
-            //Get possible neighbors
-            List<int>[] neighbors = new List<int>[4];
-            neighbors[0] = neighbors[1] = neighbors[2] = neighbors[3] = null;
-            Vector2[] neighbors_coords = new Vector2[4];
-            //You can only propagate cells that exist obviously
-            int cx, cy;
-            cx = (int)main_coord.x; cy = (int)main_coord.y;
-            if (main_coord.y - 1 >= 0) { 
-                neighbors[0] = arr[cx][cy - 1];
-                neighbors_coords[0] = new Vector2(cx, cy - 1);
-                }
-            if (main_coord.x + 1 < arr.Length)
-            {
-                neighbors[1] = arr[cx + 1][cy];
-                neighbors_coords[1] = new Vector2(cx + 1, cy);
-
-            }
-            if (main_coord.y + 1 < arr[0].Length)
-            {
-                neighbors[2] = arr[cx][cy + 1];
-                neighbors_coords[2] = new Vector2(cx, cy + 1);
-
-            }
-            if (main_coord.x - 1 >= 0)
-            {
-                neighbors[3] = arr[cx - 1][cy];
-                neighbors_coords[3] = new Vector2(cx - 1, cy);
-
-            }
-
-            //Setup infinite neighbors
-            if (neighbors[0] != null)
-                if (neighbors[0] == null)
-                    neighbors[0] = GetHyperstate(patterns);
-            if (neighbors[1] != null)
-                if (neighbors[1] == null)
-                    neighbors[1] = GetHyperstate(patterns);
-            if (neighbors[2] != null)
-                if (neighbors[2] == null)
-                    neighbors[2] = GetHyperstate(patterns); 
-            if (neighbors[3] != null)
-                if (neighbors[3] == null)
-                    neighbors[3] = GetHyperstate(patterns);
-
-            //All the neighbors of the main cell will be restricted to its possible neighbors.
-            //For the neighbors that collapse in consequence of propagation, collapse it to propagate it again
-            List<Vector2> consequently_collapsed = new List<Vector2>();
-            for (int i = 0; i < cell.Count; i++)
-            {
-                //Debug.Log("There is "+patterns.Count+" existing patterns");
-                //Debug.Log("Cell pattern "+i+" is: "+cell.possible_patterns[i]); 
-
-                List<int>[] n = patterns[cell[i]].possible_neighbors;
-
-                for (int s = 0; s < 4; s++)
-                {
-                    if (neighbors[s] != null)
-                    {
-                        if (neighbors[s].Count != 1)
-                            for (int o = 0; o < n[0].Count; o++)
-                                neighbors[s].Add(n[0][o]);
-                        if (neighbors[s].Count == 1)
-                            consequently_collapsed.Add(neighbors_coords[s]);
-                    }
-                }
-            }
-            Debug.Log(consequently_collapsed.Count + " neighbors affected.");
-            for (int i = 0; i < consequently_collapsed.Count; i++)
-            {
-                CollapseCell(arr, consequently_collapsed[i],patterns);
-            }
-        }
-=======
->>>>>>> parent of 71a1766... Early propagation
     }
 }
