@@ -35,12 +35,6 @@ namespace WaveFunctionCollapse
                     for (int o = 0; o < patterns[current_pattern].frequency; o++)
                         r_indexes.Insert(Random.Range(0, r_indexes.Count), current_pattern);
                 }
-
-                //string log = "Cell with "+c+" possible indexes generated frequency list of: ";
-                //for (int h = 0; h < r_indexes.Count; h++)
-                //    log += r_indexes[h] + " ";
-                //Debug.Log(log);
-
                 int chosen_solution = r_indexes[Random.Range(0, r_indexes.Count)];
                 cell.Clear();
                 cell.Add(chosen_solution);
@@ -83,8 +77,6 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Cannot calculate lowest entropy of null columns.");
             else if (coll.Length <= 0 || coll[0].Length <= 0)
                 Debug.LogError("Cannot calculate lowest entropy of empty array,");
-            //else if (hyperstates == null)
-            //    Debug.LogError("Cannot collapse most probable cell using null hyperstates list.");
             else if (patterns == null)
                 Debug.LogError("Cannot collapse most probable cell using null pattern list.");
 
@@ -97,34 +89,28 @@ namespace WaveFunctionCollapse
 
             int s = coll.Length;
             //Store the most probable cell in these
-            Vector2 epicenter_coords = Vector2.zero;
             List<int> epicenter_cell = new List<int>();
-            List<Vector2> collapsed_cells = new List<Vector2>();
-
-            int lowest_entropy = GetLowestEntropy(coll);
-            if (lowest_entropy == 9999)
+            int highest_entropy = GetHighestEntropy(entr);
+            if (highest_entropy == 0)
             {
-                collapsed_cells.Clear();
-                collapsed_cells.Add(CollapseHyperCell(coll, entr, patterns));
+                Debug.LogWarning("Ideally this should not be called?");
+                CollapseHyperCell(coll, entr, patterns);
             }
             else
             {
                 List<Vector2> possible_cells = new List<Vector2>();
                 for (int y = 0; y < s; y++)
                     for (int x = 0; x < s; x++)
-                        if (coll[x][y] != null)
-                            if (coll[x][y].Count == lowest_entropy)
+                            if (entr[x][y] == highest_entropy)
                                 possible_cells.Add(new Vector2(x, y));
                 //0 will always be the cell in the middle. The others are its neighbors if any
-                collapsed_cells.Clear();
-                collapsed_cells.Add(possible_cells[Random.Range(0, possible_cells.Count)]);
+                Vector2 r_cell = possible_cells[Random.Range(0, possible_cells.Count)];
+                CollapseCell(coll, entr, r_cell, patterns);
+
             }
-            epicenter_coords = collapsed_cells[0];
-            epicenter_cell = coll[(int)epicenter_coords.x][(int)epicenter_coords.y];
             //Debug.Log("Chosen cell " + chosen_cell + " within cells of entropy of " + lowest_entropy);
             //Debug.Log(chosen_cell);
             //Debug.Log(patterns[chosen_cell.possible_patterns[0]].DebugGetNeighbors());
-            CollapseCell(coll, entr, epicenter_coords, patterns, epicenter_cell[Random.Range(0, epicenter_cell.Count)]);
             //Debug.Log(DebugCells(cells));
             //Debug.log(cells, false);
             
@@ -180,10 +166,12 @@ namespace WaveFunctionCollapse
                 int x = (int)neighbors[i].x;
                 int y = (int)neighbors[i].y;
                 //If this neighbor was collapsed make it 999 so it must collapse after
-                if (coll[x][y].Count == 1)
-                    entr[x][y] = 999;
-                else
-                    entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x,y,entr)+1);
+                if (entr[x][y] != -1) {
+                    if (coll[x][y].Count == 1)
+                        entr[x][y] = 9;
+                    else
+                        entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x, y, entr) + 1);
+                }
             }
             //Debug.Log("Finished propagating");
         }
@@ -203,7 +191,7 @@ namespace WaveFunctionCollapse
                 if (entr[x - 1][y] == -1)
                     count++;
 
-            Debug.Log("Cell has " + count + "collapsed neighbors");
+            //Debug.Log("Cell has " + count + "collapsed neighbors");
             return (count);
         }
         public static List<int> GetHyperstate(List<Pattern> patterns)
@@ -214,7 +202,7 @@ namespace WaveFunctionCollapse
             return p;
         }
 
-        static int GetLowestEntropy(List<int>[][] arr)
+        static int GetHighestEntropy(int[][] arr)
         {
             //This function is used to get the lowest number of possible combinations in the board
 
@@ -228,16 +216,17 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Cannot calculate lowest entropy of empty array");
 
             int c = arr[0].Length;
-            int lowest_entropy = 9999;
+            int highest_entropy = -9999;
             for (int y = 0; y < c; y++)
                 for (int x = 0; x < c; x++)
+                    if (arr[x][y] != -1)
+                        if (arr[x][y] > highest_entropy)
+                            highest_entropy = arr[x][y];
 
-                    if (arr[x][y] != null && arr[x][y].Count > 1)
+            if (highest_entropy == -9999)
+                Debug.LogError("There is no collapsable cell int entropy array.");
 
-                        if (arr[x][y].Count < lowest_entropy && arr[x][y].Count > 1)
-                            lowest_entropy = arr[x][y].Count;
-
-            return lowest_entropy;
+            return highest_entropy;
         }
     }
 }

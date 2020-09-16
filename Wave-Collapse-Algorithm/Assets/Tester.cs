@@ -81,7 +81,6 @@ public class Tester : MonoBehaviour
         //FOR DEBUG ONLY
         initial_pattern = -1;
 
-        Vector2 collapsed_cell = Vector2.zero;
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
         if (initial_pattern != -1)
         {
@@ -93,12 +92,10 @@ public class Tester : MonoBehaviour
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
             WFCCollapse.CollapseCell(collapsing, entropy, v, all_patterns, initial_pattern);
             //After collapse, remove from infinite list
-            collapsed_cell = new Vector2(initial_x, initial_y);
             Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count);
         } else
-        {
-            collapsed_cell = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
-        }
+            WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
+        
         //Remove the collapsed cell
         //for (int i = 0; i < infinite_cells.Count; i++)
             //if (infinite_cells[i] == collapsed_cell)
@@ -109,13 +106,24 @@ public class Tester : MonoBehaviour
             //}
 
         string log = ReadArrayList(collapsing);
-        Debug.Log("<color=cyan> Initial collapse: </color> \n" + log);
+        Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
 
         log = ReadArray(entropy);
-        Debug.Log("<color=blue> Initial collapse: </color> \n" + log);
+        Debug.Log("<color=blue> Initial entropy collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
+        for (int t = 0; t < 999; t++)
+        {
+            WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
+            log = ReadArrayList(collapsing);
+            Debug.Log("<color=cyan> " + "Test" + " collapse: </color> \n" + log);
+            log = ReadArray(entropy);
+            Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+            if (CheckValidity(entropy, output_size))
+                break;
+        }
+
         yield break;
         bool is_valid = false;
         while (!is_valid)
@@ -124,12 +132,13 @@ public class Tester : MonoBehaviour
             {
                 WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
                 log = ReadArrayList(collapsing);
-                Debug.Log("<color=cyan> " + t + " collapse: </color> \n" + log);
+                Debug.Log("<color=cyan> " + t + " solution collapse: </color> \n" + log);
                 log = ReadArray(entropy);
-                Debug.Log("<color=blue> Initial collapse: </color> \n" + log);
+                Debug.Log("<color=blue> " + t + " entropy collapse: </color> \n" + log);
 
             }
-            is_valid = CheckValidity(collapsing, output_size);
+            is_valid = CheckValidity(entropy, output_size);
+
             //Debug.LogWarning("Invalid result. Looping.");
             yield return null;
         }
@@ -157,17 +166,13 @@ public class Tester : MonoBehaviour
         }
 
     }
-    bool CheckValidity(List<int>[][] cells, int length)
+    bool CheckValidity(int[][] entr, int length)
     {
         for (int y = 0; y < length; y++)
         {
             for (int x = 0; x < length; x++)
             {
-                if (cells[x][y] == null)
-                    return false;
-                else if (cells[x][y] == null)
-                    return false;
-                else if (cells[x][y].Count != 1)
+                if (entr[x][y] != -1)
                     return false;
             }
         }
