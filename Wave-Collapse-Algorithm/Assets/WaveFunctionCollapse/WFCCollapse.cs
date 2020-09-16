@@ -16,8 +16,8 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Cannot collapse a non-initialized cell");
             else if (cell.Count == 0)
                 Debug.LogError("Cannot collapse a cell with no possible solutions");
-            else if (cell.Count == 1)
-                Debug.LogWarning("Should not collapse cell with already one solution");
+            else if (cell.Count == -1)
+                Debug.LogWarning("Should not collapse cell that was already collapsed");
 
             if (collapse_into != -1)
             {
@@ -121,56 +121,93 @@ namespace WaveFunctionCollapse
         {
             int cx, cy;
             cx = (int)coords.x; cy = (int)coords.y;
-            List<int> cell = coll[cx][cy];
-            if (cell != null)
-                if (cell.Count > 1)
-                    Debug.LogWarning("Propagating cell with more than one solution: " + cell.Count);
-
+            List<int> epicenter = coll[cx][cy];
+            if (epicenter != null)
+                if (epicenter.Count > 1)
+                    Debug.LogWarning("Propagating cell with more than one solution: " + epicenter.Count);
+            Debug.Log("Propagating");
             //Find neighbors
             //Before propagation get valid neighbors
-            List<Vector2> neighbors = new List<Vector2>();
+            Vector2[] neighbors = new Vector2[4];
             //You can only propagate cells that exist obviously
+            for (int i = 0; i < 4; i++)
+                neighbors[i] = new Vector2(-1,-1);
             
             if (coords.y - 1 >= 0)
-                neighbors.Add(new Vector2(cx,cy - 1));
+                neighbors[0] = (new Vector2(cx,cy - 1));
             if (coords.x + 1 < coll.Length)
-                neighbors.Add(new Vector2(cx + 1, cy));
+                neighbors[1] = (new Vector2(cx + 1, cy));
             if (coords.y + 1 < coll[0].Length)
-                neighbors.Add(new Vector2(cx, cy + 1));
+                neighbors[2] = (new Vector2(cx, cy + 1));
             if (coords.x - 1 >= 0)
-                neighbors.Add(new Vector2(cx - 1, cy));
+                neighbors[3] = (new Vector2(cx - 1, cy));
 
-            for (int i = 0; i < neighbors.Count; i++)
-                if(coll[(int)neighbors[i].x][(int)neighbors[i].y] == null)
-                    coll[(int)neighbors[i].x][(int)neighbors[i].y] = GetHyperstate(patterns);
+            Debug.Log(neighbors[0] + " / " + neighbors[1] + " / " + neighbors[2] + " / " + neighbors[3]);
 
-            //All the neighbors of the main cell will be restricted to its possible neighbors.
-            //This is WRONG
-            for (int i = 0; i < cell.Count; i++)
+            //All the neighbors of the main cell will be restricted to its possible neighbors
+            for (int side = 0; side < neighbors.Length; side++)
             {
-
-                List<int>[] n = patterns[cell[i]].possible_neighbors;
-
-                for (int k = 0; k < neighbors.Count; k++)
+                if (neighbors[side] != new Vector2(-1, -1))
                 {
-                    List<int> c = coll[(int)neighbors[k].x][(int)neighbors[k].y];
-                    if (c.Count != 1)
-                            for (int o = 0; o < n[0].Count; o++)
-                                c.Add(n[0][o]);
-                    
+
+                    int entropy = entr[(int)neighbors[side].x][(int)neighbors[side].y];
+                    List<int> possibilities = patterns[epicenter[0]].possible_neighbors[side];
+
+                    //Check if this "neighbor" has infinite solutions
+                    if (entropy == 0)
+                    {
+                        Debug.Log("This neighbor should have the total possibilities of its epicenter.");
+                        //If it does set its solutions to the possible neighbors from the epicenter
+                        int nx = (int)neighbors[side].x;
+                        int ny = (int)neighbors[side].y;
+                        coll[nx][ny].Clear();
+                        foreach (int p in possibilities)
+                            coll[nx][ny].Add(p);
+                    }
+                    //If the "neighbor" does have solutions already and it is not collapsed
+                    else if (entropy != -1)
+                    {
+                        Debug.Log("This neighbor should have set solutions already.");
+                        //Go through the current solutions 
+                        //Record solutions that must be removed
+                        List<int> current_possibilities = coll[(int)neighbors[side].x][(int)neighbors[side].y];
+                        Debug.Log("Working on cell with " + current_possibilities.Count + " solutions and entropy of "+entropy);
+                        //ERROR HERE
+                        int iterations = current_possibilities.Count-1;
+                        bool is_valid;
+                        for (int c = iterations; c >= 0; c--)
+                        {
+                            //Flag the ones that are no valid
+                            is_valid = false;
+                            foreach(int p in possibilities)                                                             
+                                if (current_possibilities[c] == p)
+                                    is_valid = true;
+                            //If there is no solution leave the last solution as the only possible
+                            if (!is_valid)
+                                current_possibilities.RemoveAt(c);
+                        }
+                        coll[(int)neighbors[side].x][(int)neighbors[side].y] = current_possibilities;
+                        Debug.Log("Neighbor has " + current_possibilities.Count + " current possibilities");
+
+                    }
                 }
             }
+                
             //Update entropy array
-            for (int i = 0; i < neighbors.Count; i++)
+            for (int i = 0; i < neighbors.Length; i++)
             {
-                int x = (int)neighbors[i].x;
-                int y = (int)neighbors[i].y;
-                //If this neighbor was collapsed make it 999 so it must collapse after
-                if (entr[x][y] != -1) {
-                    if (coll[x][y].Count == 1)
-                        entr[x][y] = 9 * (GetCollapsedNeighborCount(x, y, entr) + 1);
-                    else
-                        entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x, y, entr) + 1);
+                if (neighbors[i] != new Vector2(-1, -1))
+                {
+                    int x = (int)neighbors[i].x;
+                    int y = (int)neighbors[i].y;
+                    //If this neighbor was collapsed make it 9* so it must collapse after
+                    if (entr[x][y] != -1)
+                    {
+                        if (coll[x][y].Count == 1)
+                            entr[x][y] = 9 * (GetCollapsedNeighborCount(x, y, entr) + 1);
+                        else
+                            entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x, y, entr) + 1);
+                    }
                 }
             }
             //Debug.Log("Finished propagating");
