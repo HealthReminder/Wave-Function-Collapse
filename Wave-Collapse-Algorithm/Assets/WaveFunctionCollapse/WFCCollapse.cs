@@ -168,7 +168,7 @@ namespace WaveFunctionCollapse
                 //If this neighbor was collapsed make it 999 so it must collapse after
                 if (entr[x][y] != -1) {
                     if (coll[x][y].Count == 1)
-                        entr[x][y] = 9;
+                        entr[x][y] = 9 * (GetCollapsedNeighborCount(x, y, entr) + 1);
                     else
                         entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x, y, entr) + 1);
                 }

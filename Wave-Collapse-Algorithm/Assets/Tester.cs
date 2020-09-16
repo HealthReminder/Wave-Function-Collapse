@@ -113,18 +113,6 @@ public class Tester : MonoBehaviour
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
-        for (int t = 0; t < 999; t++)
-        {
-            WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
-            log = ReadArrayList(collapsing);
-            Debug.Log("<color=cyan> " + "Test" + " collapse: </color> \n" + log);
-            log = ReadArray(entropy);
-            Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
-            if (CheckValidity(entropy, output_size))
-                break;
-        }
-
-        yield break;
         bool is_valid = false;
         while (!is_valid)
         {
@@ -132,15 +120,13 @@ public class Tester : MonoBehaviour
             {
                 WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
                 log = ReadArrayList(collapsing);
-                Debug.Log("<color=cyan> " + t + " solution collapse: </color> \n" + log);
+                Debug.Log("<color=cyan> " + "Test" + " collapse: </color> \n" + log);
                 log = ReadArray(entropy);
-                Debug.Log("<color=blue> " + t + " entropy collapse: </color> \n" + log);
-
+                Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+                if (CheckValidity(entropy, output_size))
+                    break;
             }
-            is_valid = CheckValidity(entropy, output_size);
-
-            //Debug.LogWarning("Invalid result. Looping.");
-            yield return null;
+            is_valid = CheckValidity(entropy,output_size);
         }
         #endregion
         yield break;
@@ -211,9 +197,9 @@ public class Tester : MonoBehaviour
             for (int x = 0; x < s; x++)
             {
                 if (arraylist[y][x].Count <= 0)
-                    log += "X";
+                    log += "▓";
                 else if (arraylist[y][x].Count > 1)
-                    log += "O";
+                    log += "▒";
                 else if (arraylist[y][x].Count == 1)
                     log += arraylist[y][x][0];
             }
