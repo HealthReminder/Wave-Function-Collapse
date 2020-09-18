@@ -125,7 +125,7 @@ namespace WaveFunctionCollapse
             if (epicenter != null)
                 if (epicenter.Count > 1)
                     Debug.LogWarning("Propagating cell with more than one solution: " + epicenter.Count);
-            Debug.Log("Propagating");
+            //Debug.Log("Propagating");
             //Find neighbors
             //Before propagation get valid neighbors
             Vector2[] neighbors = new Vector2[4];
@@ -142,7 +142,7 @@ namespace WaveFunctionCollapse
             if (coords.x - 1 >= 0)
                 neighbors[3] = (new Vector2(cx - 1, cy));
 
-            Debug.Log(neighbors[0] + " / " + neighbors[1] + " / " + neighbors[2] + " / " + neighbors[3]);
+            //Debug.Log(neighbors[0] + " / " + neighbors[1] + " / " + neighbors[2] + " / " + neighbors[3]);
 
             //All the neighbors of the main cell will be restricted to its possible neighbors
             for (int side = 0; side < neighbors.Length; side++)
@@ -156,7 +156,7 @@ namespace WaveFunctionCollapse
                     //Check if this "neighbor" has infinite solutions
                     if (entropy == 0)
                     {
-                        Debug.Log("This neighbor should have the total possibilities of its epicenter.");
+                        //Debug.Log("This neighbor should have the total possibilities of its epicenter.");
                         //If it does set its solutions to the possible neighbors from the epicenter
                         int nx = (int)neighbors[side].x;
                         int ny = (int)neighbors[side].y;
@@ -167,11 +167,11 @@ namespace WaveFunctionCollapse
                     //If the "neighbor" does have solutions already and it is not collapsed
                     else if (entropy != -1)
                     {
-                        Debug.Log("This neighbor should have set solutions already.");
+                        //Debug.Log("This neighbor should have set solutions already.");
                         //Go through the current solutions 
                         //Record solutions that must be removed
                         List<int> current_possibilities = coll[(int)neighbors[side].x][(int)neighbors[side].y];
-                        Debug.Log("Working on cell with " + current_possibilities.Count + " solutions and entropy of "+entropy);
+                        //Debug.Log("Working on cell with " + current_possibilities.Count + " solutions and entropy of "+entropy);
                         //ERROR HERE
                         int iterations = current_possibilities.Count-1;
                         bool is_valid;
@@ -187,7 +187,7 @@ namespace WaveFunctionCollapse
                                 current_possibilities.RemoveAt(c);
                         }
                         coll[(int)neighbors[side].x][(int)neighbors[side].y] = current_possibilities;
-                        Debug.Log("Neighbor has " + current_possibilities.Count + " current possibilities");
+                        //Debug.Log("Neighbor has " + current_possibilities.Count + " current possibilities");
 
                     }
                 }
@@ -247,8 +247,6 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Cannot calculate lowest entropy of null array.");
             else if (arr[0] == null)
                 Debug.LogError("Cannot calculate lowest entropy of null rows.");
-            else if (arr[0][0] == null)
-                Debug.LogError("Cannot calculate lowest entropy of null columns.");
             else if (arr.Length <= 0 || arr[0].Length <= 0)
                 Debug.LogError("Cannot calculate lowest entropy of empty array");
 

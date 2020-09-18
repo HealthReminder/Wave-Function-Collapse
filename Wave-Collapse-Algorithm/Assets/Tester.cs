@@ -5,7 +5,7 @@ using WaveFunctionCollapse;
 
 public class Tester : MonoBehaviour
 {
-    public int pattern_size = 2;
+    public int pattern_size = 3;
     #region Active
     int[][] input;
     int[][] offset;
@@ -13,6 +13,7 @@ public class Tester : MonoBehaviour
     List<Pattern> unique;
     List<int>[][] collapsing;
     int[][] entropy;
+    int[][] output;
 
 
     private void Start()
@@ -24,7 +25,7 @@ public class Tester : MonoBehaviour
     {
         input = GenerateInput();
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
-        offset = WFCInput.GetOffsetArray(input, pattern_size);
+        offset = WFCInputOutput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
 
 
@@ -96,20 +97,16 @@ public class Tester : MonoBehaviour
         } else
             WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
         
-        //Remove the collapsed cell
-        //for (int i = 0; i < infinite_cells.Count; i++)
-            //if (infinite_cells[i] == collapsed_cell)
-            //{
-            //    infinite_cells.RemoveAt(i);
-            //    Debug.Log("Found collapsed cell in infinite list");
-            //    break;
-            //}
-
         string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
 
         log = ReadArray(entropy);
         Debug.Log("<color=blue> Initial entropy collapse: </color> \n" + log);
+
+        //READ OUTPUT
+        output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
+        log = ReadArray(output);
+        Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
@@ -119,15 +116,30 @@ public class Tester : MonoBehaviour
             for (int t = 0; t < 999; t++)
             {
                 WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
-                log = ReadArrayList(collapsing);
-                Debug.Log("<color=cyan> " + "Test" + " collapse: </color> \n" + log);
-                log = ReadArray(entropy);
-                Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+
+                //READ COLLAPSING
+                //log = ReadArrayList(collapsing);
+                //Debug.Log("<color=cyan> " + "Test" + " collapse: </color> \n" + log);
+
+                //READ ENTROPY
+                //log = ReadArray(entropy);
+                //Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+
+                //READ OUTPUT
+                output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
+                log = ReadArray(output);
+                Debug.Log("<color=magenta> " + "Output array" + " collapse: </color> \n" + log);
+
                 if (CheckValidity(entropy, output_size))
                     break;
             }
             is_valid = CheckValidity(entropy,output_size);
         }
+        //Creation was successful!
+        //Generate the output
+        output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
+        log = ReadArray(output);
+        Debug.Log("<color=magenta> " + "Output array" + " collapse: </color> \n" + log);
         #endregion
         yield break;
     }
