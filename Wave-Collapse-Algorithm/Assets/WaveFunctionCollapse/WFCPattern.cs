@@ -34,6 +34,7 @@ namespace WaveFunctionCollapse
             }
             return log;
         }
+        /*
         public string GetSides()
         {
             string log = "";
@@ -48,12 +49,10 @@ namespace WaveFunctionCollapse
                         log += sides[i][o];
                     }
                     log += "\n";
-
                 }
-
             }
             return log;
-        }
+        }*/
         public string GetNeighbors(List<Pattern> pattern_list)
         {
             string log = "";
@@ -99,11 +98,11 @@ namespace WaveFunctionCollapse
             int size_x = offset.Length;
             int size_y = offset[0].Length;
             int[][] pattern_array = new int[size_x][];
-
             for (int x = 0; x < size_x; x++)
                 pattern_array[x] = new int[size_x];
-            for (int x = 0; x < size_x; x++)
-                for (int y = 0; y < size_y; y++)
+
+            for (int y = 0; y < size_y; y++)
+                for (int x = 0; x < size_x; x++)
                     pattern_array[x][y] = offset[x][y];
 
             //This array is used to store the unique pattern indexes
@@ -114,9 +113,10 @@ namespace WaveFunctionCollapse
             for (int i = 0; i < pattern_size; i++)
                 current_pattern[i] = new int[pattern_size];
 
-            for (int x = 0; x < size_x; x++)
+
+            for (int y = 0; y < size_y; y++)
             {
-                for (int y = 0; y < size_y; y++)
+                for (int x = 0; x < size_x; x++)
                 {
                     bool is_out_of_bounds = false;
                     //Get the next pattern if not out of bounds
@@ -128,7 +128,7 @@ namespace WaveFunctionCollapse
                             {
                                 //For some reason b must be in place of a
                                 //Otherwise pattern identification invert axis
-                                current_pattern[b][a] = pattern_array[x + a][y + b];
+                                current_pattern[a][b] = pattern_array[x + a][y + b];
                             }
                         }
                     }
@@ -203,8 +203,8 @@ namespace WaveFunctionCollapse
             for (int i = 0; i < c; i++)
                 pattern_list[i].possible_neighbors = GetNeighbors(pattern_list[i], pattern_list);
 
-           // for (int i = 0; i < c; i++)
-               //Debug.Log("Logging pattern: " + pattern_list[i].GetValues() + " with sides: " + pattern_list[i].GetSides() + " of neighbors: " + pattern_list[i].GetNeighbors());
+            // for (int i = 0; i < c; i++)
+            //Debug.Log("Logging pattern: " + pattern_list[i].GetValues() + " with sides: " + pattern_list[i].GetSides() + " of neighbors: " + pattern_list[i].GetNeighbors());
 
             return (pattern_list);
         }
@@ -313,6 +313,6 @@ namespace WaveFunctionCollapse
             }
             return result.ToArray();
         }
-       
+
     }
 }

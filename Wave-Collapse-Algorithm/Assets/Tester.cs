@@ -44,10 +44,10 @@ public class Tester : MonoBehaviour
             log += unique[i].GetFrequency() + "\n";
         Debug.Log("<color=red> Frequency of unique patterns: \n</color> " + log);
 
-        log = "";
-        for (int i = 0; i < unique.Count; i++)
-            log += unique[i].GetSides() + "\n";
-        Debug.Log("<color=red> Sides of unique patterns: \n</color> " + log);
+        //log = "";
+        //for (int i = 0; i < unique.Count; i++)
+        //    log += unique[i].GetSides() + "\n";
+        //Debug.Log("<color=red> Sides of unique patterns: \n</color> " + log);
 
         log = "";
         for (int i = 0; i < unique.Count; i++)
@@ -182,12 +182,57 @@ public class Tester : MonoBehaviour
     {
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
-        List<int[]> lists = new List<int[]>();
-        lists.Add(new int[4] { 0, 0, 0, 0 });
-        lists.Add(new int[4] { 0, 0, 0, 0 });
-        lists.Add(new int[4] { 1, 1, 1, 1 });
-        lists.Add(new int[4] { 0, 0, 0, 0 });
-        result = lists.ToArray();
+        //List<int[]> lists = new List<int[]>();
+
+        //The input is inverted to keep it friendly
+        //lists.Add(new int[4] { 1, 0, 0, 0 });
+        //lists.Add(new int[4] { 0, 0, 0, 0 });
+        //lists.Add(new int[4] { 1, 1, 1, 1 });
+        //lists.Add(new int[4] { 0, 0, 0, 0 });
+
+        result = new int[4][];
+        for (int x = 0; x < 4; x++)
+            result[x] = new int[4];
+
+        //results in
+        // 1 2
+        // 4 3
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                if(y%2 == 0)
+                {
+                    if(x%2 == 0)
+                        result[x][y] = 1;
+                    else
+                        result[x][y] = 2;
+                }
+                else
+                {
+                    if (x % 2 == 0)
+                        result[x][y] = 4;
+                    else
+                        result[x][y] = 3;
+                }
+            }
+        }
+
+        //results in a line
+        // 0 0
+        // 1 1
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                if (y != 2)
+                    result[x][y] = 0;
+                else
+                    result[x][y] = 1;
+            }
+        }
+
+        //result = lists.ToArray();
         return result;
     }
     #endregion
@@ -219,18 +264,18 @@ public class Tester : MonoBehaviour
         }
         return log;
     }
-    string ReadArray(int[][] array)
+    string ReadArray(int[][] arr)
     {
         string log = "";
-        if (array == null)
+        if (arr == null)
             log += ("NULL INT ARRAY");
         else
         {
-            for (int i = 0; i < array.Length; i++)
+            for (int y = 0; y < arr.Length; y++)
             {
-                for (int o = 0; o < array[i].Length; o++)
+                for (int x = 0; x < arr[y].Length; x++)
                 {
-                    log += array[i][o];
+                    log += arr[x][y];
                 }
                 log += "\n";
 
