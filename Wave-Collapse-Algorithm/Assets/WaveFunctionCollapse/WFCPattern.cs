@@ -34,25 +34,6 @@ namespace WaveFunctionCollapse
             }
             return log;
         }
-        /*
-        public string GetSides()
-        {
-            string log = "";
-            if (sides == null)
-                return ("NULL SIDES");
-            else
-            {
-                for (int i = 0; i < sides.Length; i++)
-                {
-                    for (int o = 0; o < sides[i].Length; o++)
-                    {
-                        log += sides[i][o];
-                    }
-                    log += "\n";
-                }
-            }
-            return log;
-        }*/
         public string GetNeighbors(List<Pattern> pattern_list)
         {
             string log = "";
@@ -113,7 +94,6 @@ namespace WaveFunctionCollapse
             for (int i = 0; i < pattern_size; i++)
                 current_pattern[i] = new int[pattern_size];
 
-
             for (int y = 0; y < size_y; y++)
             {
                 for (int x = 0; x < size_x; x++)
@@ -137,7 +117,7 @@ namespace WaveFunctionCollapse
                         is_out_of_bounds = true;
                     }
 
-                    if (!is_out_of_bounds)
+                    if (!is_out_of_bounds && x%pattern_size == 0 && y%pattern_size == 0)
                     {
                         //Compare it to other patterns in the unique pattern list
                         int unique_id = pattern_list.Count;
@@ -176,37 +156,70 @@ namespace WaveFunctionCollapse
                     }
                 }
             }
-
             //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
-            pattern_list = FillPatterns(pattern_list);
+            GetNeighbors(pattern_array, pattern_size, pattern_list);
             return (pattern_array, pattern_list);
         }
-
-        static List<Pattern> FillPatterns(List<Pattern> pattern_list)
+        static void GetNeighbors(int[][] arr, int pat_size, List<Pattern> pat_list)
         {
             //This function assume that the unique patterns were already cached in the pattern list
-            int pattern_size = pattern_list[0].values.Length;
-            int c = pattern_list.Count;
+            int pattern_size = pat_list[0].values.Length;
+            int c = pat_list.Count;
             if (pattern_size <= 0)
                 Debug.LogError("Cannot fill patterns with less than one size.");
-            else if (pattern_list == null)
+            else if (pat_list == null)
                 Debug.LogError("Cannot fill patterns with null pattern array.");
-            else if (pattern_list.Count <= 0)
+            else if (pat_list.Count <= 0)
                 Debug.LogError("Cannot fill patterns with empty pattern array.");
 
-            //Assign the sides of the pattern to compared later
-            for (int i = 0; i < c; i++)
-                pattern_list[i].sides = GetPatternSides(pattern_list[i]);
-            //Debug.Log("Got pattern sides for pattern: " + patterns[i].DebugGetValues() + " with the resulting of: " + patterns[i].DebugGetSides());
+            //For each unique pattern on list
+            //Add the current array selection neighboring unique pattern indexes 
 
-            //Get the neighbors of the patterns
-            for (int i = 0; i < c; i++)
-                pattern_list[i].possible_neighbors = GetNeighbors(pattern_list[i], pattern_list);
+            //Setup neighbor patterns
+            for (int i = 0; i < pat_list.Count; i++)
+            {
+                pat_list[i].possible_neighbors = new List<int>[4];
+                for (int o = 0; o < 4; o++)
+                    pat_list[i].possible_neighbors[o] = new List<int>();
 
-            // for (int i = 0; i < c; i++)
-            //Debug.Log("Logging pattern: " + pattern_list[i].GetValues() + " with sides: " + pattern_list[i].GetSides() + " of neighbors: " + pattern_list[i].GetNeighbors());
+            }
+            //URGENT: FIND OUT WHERE YOU USED INVERT SIDE CAUSE YOU MIGHT NEED TO INVERT NEIGHBORS?
+            //Go through the pattern array 
+            int l = arr.Length;
+            for (int y = 0; y < l; y += pattern_size)
+            {
+                for (int x = 0; x < l; x += pattern_size)
+                {
+                    //Get the pattern from list
+                    int index = arr[x][y];
+                    if (index != -1)
+                    {
+                        Pattern current_pattern = pat_list[arr[x][y]];
+                        //Debug.Log("Getting neighbors for pattern " + arr[x][y]);
 
-            return (pattern_list);
+                        //Check if neighbor is valid
+                        if (y - pat_size >= 0)
+                            if (arr[x][y - pat_size] != -1)
+                                //If this is not a neighbor already, add it
+                                if (!current_pattern.possible_neighbors[0].Contains(arr[x][y - pat_size]))
+                                    current_pattern.possible_neighbors[0].Add(arr[x][y - pat_size]);
+                        if (x + pat_size < l)
+                            if (arr[x + pat_size][y] != -1)
+                                if (!current_pattern.possible_neighbors[1].Contains(arr[x + pat_size][y]))
+                                    current_pattern.possible_neighbors[1].Add(arr[x + pat_size][y]);
+                        if (y + pat_size < l)
+                            if (arr[x][y + pat_size] != -1)
+                                if (!current_pattern.possible_neighbors[2].Contains(arr[x][y + pat_size]))
+                                    current_pattern.possible_neighbors[2].Add(arr[x][y + pat_size]);
+                        if (x - pat_size >= 0)
+                            if (arr[x - pat_size][y] != -1)
+                                if (!current_pattern.possible_neighbors[3].Contains(arr[x - pat_size][y]))
+                                    current_pattern.possible_neighbors[3].Add(arr[x - pat_size][y]);
+                        //Debug.Log("Getting neighbors for pattern " + arr[x][y]);
+                    }
+                }
+            }
+
         }
         static bool CompareArrays(int[][] a, int[][] b)
         {
@@ -221,98 +234,16 @@ namespace WaveFunctionCollapse
                         return false;
             return true;
         }
-        static List<int>[] GetNeighbors(Pattern pat, List<Pattern> patterns)
-        {
-            List<int>[] cache = new List<int>[4];
-            int c = patterns.Count;
-            //Each side of the pattern will be compared to the respective side of the pattern list
-            for (int side_index = 0; side_index < 4; side_index++)
-            {
-                cache[side_index] = new List<int>();
-                for (int o = 0; o < c; o++)
-                {
-                    if (CompareSides(pat, patterns[o], side_index))
-                    {
-                        cache[side_index].Add(o);
-                    }
-                }
-            }
-            return (cache);
-        }
-        static bool CompareSides(Pattern pat, Pattern comparingTo, int side)
-        {
-            if (pat.sides == null || comparingTo.sides == null)
-                Debug.LogError("Input cannot compare null sides of patterns.");
-
-            //int comparing_index = side+2;
-            //if (comparing_index > side)
-            //    comparing_index -= side+1;
-            int comparing_index = 0;
-            if (side == 0)
-                comparing_index = 2;
-            else if (side == 1)
-                comparing_index = 3;
-            else if (side == 2)
-                comparing_index = 0;
-            else if (side == 3)
-                comparing_index = 1;
-
-            bool result = true;
-            int[] s = pat.sides[side];
-            int[] c = ArrayInvert(comparingTo.sides[comparing_index]);
-            for (int i = 0; i < s.Length; i++)
-            {
-                if (s[i] != c[i])
-                    result = false;
-            }
-            //Debug.Log(result + " result for neighbor \n"+comparingTo.GetValues()+ " of \n" + pat.GetValues() + " for side: \n"+side);
-            return result;
-        }
-        static int[][] GetPatternSides(Pattern pat)
-        {
+        //static int[] ArrayInvert(int[] original)
+        //{
             //Tested
-            //This variable will store the values of the cells of each of the four sides starting by the top side
-            int[][] result = new int[4][];
-            int size = pat.values.Length;
-
-            List<int> cache = new List<int>();
-
-            //Get up side
-            for (int i = 0; i < size; i++)
-                cache.Add(pat.values[i][0]);
-            result[0] = cache.ToArray();
-
-            //Get right side
-            cache.Clear();
-            for (int i = 0; i < size; i++)
-                cache.Add(pat.values[size - 1][i]);
-            result[1] = cache.ToArray();
-
-            //Get down side
-            cache.Clear();
-            for (int i = 0; i < size; i++)
-                cache.Add(pat.values[i][size - 1]);
-            result[2] = ArrayInvert(cache.ToArray());
-
-            //Get left side
-            cache.Clear();
-            for (int i = 0; i < size; i++)
-                cache.Add(pat.values[0][i]);
-
-            result[3] = ArrayInvert(cache.ToArray());
-
-            return result;
-        }
-        static int[] ArrayInvert(int[] original)
-        {
-            //Tested
-            List<int> result = new List<int>();
-            for (int i = original.Length - 1; i >= 0; i--)
-            {
-                result.Add(original[i]);
-            }
-            return result.ToArray();
-        }
+        //    List<int> result = new List<int>();
+        //    for (int i = original.Length - 1; i >= 0; i--)
+        //    {
+        //        result.Add(original[i]);
+        //    }
+        //    return result.ToArray();
+        //}
 
     }
 }

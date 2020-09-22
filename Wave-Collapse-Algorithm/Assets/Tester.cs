@@ -194,6 +194,20 @@ public class Tester : MonoBehaviour
         for (int x = 0; x < 4; x++)
             result[x] = new int[4];
 
+        //results in a line
+        // 0 0
+        // 1 1
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                if (y != 2)
+                    result[x][y] = 0;
+                else
+                    result[x][y] = 1;
+            }
+        }
+
         //results in
         // 1 2
         // 4 3
@@ -218,19 +232,7 @@ public class Tester : MonoBehaviour
             }
         }
 
-        //results in a line
-        // 0 0
-        // 1 1
-        for (int y = 0; y < 4; y++)
-        {
-            for (int x = 0; x < 4; x++)
-            {
-                if (y != 2)
-                    result[x][y] = 0;
-                else
-                    result[x][y] = 1;
-            }
-        }
+       
 
         //result = lists.ToArray();
         return result;
