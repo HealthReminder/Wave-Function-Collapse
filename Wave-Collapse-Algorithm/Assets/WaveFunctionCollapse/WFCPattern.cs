@@ -116,8 +116,8 @@ namespace WaveFunctionCollapse
                     {
                         is_out_of_bounds = true;
                     }
-
-                    if (!is_out_of_bounds && x%pattern_size == 0 && y%pattern_size == 0)
+                    // && x%pattern_size == 0 && y%pattern_size == 0
+                    if (!is_out_of_bounds)
                     {
                         //Compare it to other patterns in the unique pattern list
                         int unique_id = pattern_list.Count;
@@ -181,14 +181,12 @@ namespace WaveFunctionCollapse
                 pat_list[i].possible_neighbors = new List<int>[4];
                 for (int o = 0; o < 4; o++)
                     pat_list[i].possible_neighbors[o] = new List<int>();
-
             }
-            //URGENT: FIND OUT WHERE YOU USED INVERT SIDE CAUSE YOU MIGHT NEED TO INVERT NEIGHBORS?
             //Go through the pattern array 
             int l = arr.Length;
-            for (int y = 0; y < l; y += pattern_size)
+            for (int y = 0; y < l; y ++)
             {
-                for (int x = 0; x < l; x += pattern_size)
+                for (int x = 0; x < l; x ++)
                 {
                     //Get the pattern from list
                     int index = arr[x][y];
@@ -198,24 +196,28 @@ namespace WaveFunctionCollapse
                         //Debug.Log("Getting neighbors for pattern " + arr[x][y]);
 
                         //Check if neighbor is valid
-                        if (y - pat_size >= 0)
-                            if (arr[x][y - pat_size] != -1)
+                        if (y - 1 >= 0)
+                            if (arr[x][y - 1] != -1)
                                 //If this is not a neighbor already, add it
-                                if (!current_pattern.possible_neighbors[0].Contains(arr[x][y - pat_size]))
-                                    current_pattern.possible_neighbors[0].Add(arr[x][y - pat_size]);
-                        if (x + pat_size < l)
-                            if (arr[x + pat_size][y] != -1)
-                                if (!current_pattern.possible_neighbors[1].Contains(arr[x + pat_size][y]))
-                                    current_pattern.possible_neighbors[1].Add(arr[x + pat_size][y]);
-                        if (y + pat_size < l)
-                            if (arr[x][y + pat_size] != -1)
-                                if (!current_pattern.possible_neighbors[2].Contains(arr[x][y + pat_size]))
-                                    current_pattern.possible_neighbors[2].Add(arr[x][y + pat_size]);
-                        if (x - pat_size >= 0)
-                            if (arr[x - pat_size][y] != -1)
-                                if (!current_pattern.possible_neighbors[3].Contains(arr[x - pat_size][y]))
-                                    current_pattern.possible_neighbors[3].Add(arr[x - pat_size][y]);
-                        //Debug.Log("Getting neighbors for pattern " + arr[x][y]);
+                                if (!current_pattern.possible_neighbors[0].Contains(arr[x][y - 1]))
+                                    current_pattern.possible_neighbors[0].Add(arr[x][y - 1]);
+                        if (x + 1 < l)
+                            if (arr[x + 1][y] != -1)
+                                if (!current_pattern.possible_neighbors[1].Contains(arr[x + 1][y]))
+                                    current_pattern.possible_neighbors[1].Add(arr[x + 1][y]);
+                        if (y + 1 < l)
+                            if (arr[x][y + 1] != -1)
+                                if (!current_pattern.possible_neighbors[2].Contains(arr[x][y + 1]))
+                                    current_pattern.possible_neighbors[2].Add(arr[x][y + 1]);
+                        if (x - 1 >= 0)
+                            if (arr[x - 1][y] != -1)
+                                if (!current_pattern.possible_neighbors[3].Contains(arr[x - 1][y]))
+                                    current_pattern.possible_neighbors[3].Add(arr[x - 1][y]);
+
+                        int sum = 0;
+                        for (int i = 0; i < 4; i++)
+                            sum += current_pattern.possible_neighbors[i].Count;
+                        //Debug.Log("Getting neighbors for pattern " + arr[x][y] +" = "+sum);
                     }
                 }
             }

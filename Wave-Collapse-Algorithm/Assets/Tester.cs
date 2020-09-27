@@ -56,7 +56,7 @@ public class Tester : MonoBehaviour
 
         //Output an array of patterns of X size according to a pattern list
         //Optional parameters to include a preset first cell
-        yield return CollapseArray(pattern_size*3, unique, 1);
+        yield return CollapseArray(pattern_size*10, unique, 1);
 
         Debug.Log("Finished test routine.");
         yield break;
@@ -80,18 +80,18 @@ public class Tester : MonoBehaviour
 
         #region WFC Algorithm
         //FOR DEBUG ONLY
-        initial_pattern = -1;
+        initial_pattern = 1;
 
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
         if (initial_pattern != -1)
         {
             if (initial_x == -1)
-                initial_x = Random.Range(0, output_size);
+                initial_x = 2;//Random.Range(0, output_size);
             if (initial_y == -1)
-                initial_y = Random.Range(0, output_size);
-            Vector2 v = new Vector2(initial_x, initial_y);
+                initial_y = 2;//Random.Range(0, output_size);
+            Vector2 coord = new Vector2(initial_x, initial_y);
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
-            WFCCollapse.CollapseCell(collapsing, entropy, v, all_patterns, initial_pattern);
+            WFCCollapse.CollapseCell(collapsing, entropy, coord, all_patterns, initial_pattern);
             //After collapse, remove from infinite list
             Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count);
         } else
@@ -100,8 +100,8 @@ public class Tester : MonoBehaviour
         string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
 
-        log = ReadArray(entropy);
-        Debug.Log("<color=blue> Initial entropy collapse: </color> \n" + log);
+        //log = ReadArray(entropy);
+        //Debug.Log("<color=blue> Initial entropy collapse: </color> \n" + log);
 
         //READ OUTPUT
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
@@ -123,7 +123,7 @@ public class Tester : MonoBehaviour
 
                 //READ ENTROPY
                 //log = ReadArray(entropy);
-                //Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+               // Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
 
                 //READ OUTPUT
                 output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
@@ -147,21 +147,19 @@ public class Tester : MonoBehaviour
     {
         collapsing = new List<int>[s][];
         for (int y = 0; y < s; y++)
-        {
             collapsing[y] = new List<int>[s];
-            for (int x = 0; x < s; x++)
-                collapsing[y][x] = new List<int>();
 
-        }
+        for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
+                collapsing[x][y] = new List<int>();
+
+
         entropy = new int[s][];
         for (int i = 0; i < s; i++)
-        {
             entropy[i] = new int[s];
+        for (int i = 0; i < s; i++)
             for (int o = 0; o < s; o++)
-            {
-                entropy[i][o] = 0;
-            }
-        }
+                entropy[o][i] = 0;
 
     }
     bool CheckValidity(int[][] entr, int length)
@@ -182,42 +180,22 @@ public class Tester : MonoBehaviour
     {
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
-        //List<int[]> lists = new List<int[]>();
-
-        //The input is inverted to keep it friendly
-        //lists.Add(new int[4] { 1, 0, 0, 0 });
-        //lists.Add(new int[4] { 0, 0, 0, 0 });
-        //lists.Add(new int[4] { 1, 1, 1, 1 });
-        //lists.Add(new int[4] { 0, 0, 0, 0 });
-
         result = new int[4][];
         for (int x = 0; x < 4; x++)
             result[x] = new int[4];
 
-        //results in a line
-        // 0 0
-        // 1 1
-        for (int y = 0; y < 4; y++)
-        {
-            for (int x = 0; x < 4; x++)
-            {
-                if (y != 2)
-                    result[x][y] = 0;
-                else
-                    result[x][y] = 1;
-            }
-        }
+        
 
-        //results in
+        //Results in
         // 1 2
         // 4 3
         for (int y = 0; y < 4; y++)
         {
             for (int x = 0; x < 4; x++)
             {
-                if(y%2 == 0)
+                if (y % 2 == 0)
                 {
-                    if(x%2 == 0)
+                    if (x % 2 == 0)
                         result[x][y] = 1;
                     else
                         result[x][y] = 2;
@@ -232,9 +210,28 @@ public class Tester : MonoBehaviour
             }
         }
 
-       
+        //Results in a line
+        // 0 0
+        // 1 1
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                if (y != 2)
+                    result[x][y] = 0;
+                else
+                    result[x][y] = 1;
+            }
+        }
+        //Results axis-inverted inputs
+        List<int[]> lists = new List<int[]>();
+        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
+        lists.Add(new int[5] { 0, 4, 0, 0, 0 });
+        lists.Add(new int[5] { 0, 0, 4, 0, 2 });
+        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
+        lists.Add(new int[5] { 1, 1, 1, 1, 1 });
+        result = lists.ToArray();
 
-        //result = lists.ToArray();
         return result;
     }
     #endregion

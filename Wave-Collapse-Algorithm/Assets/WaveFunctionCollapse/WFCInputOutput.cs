@@ -56,10 +56,20 @@ namespace WaveFunctionCollapse
             int coll_size = coll.Length;
             //Setup result array
             int[][] result;
-            result = new int[coll_size * pattern_size][];
+            result = new int[coll_size][];
             for (int i = 0; i < result.Length; i++)
-                result[i] = new int[coll_size*pattern_size];
+                result[i] = new int[coll_size];
 
+            for (int i = 0; i < result.Length; i++)
+            {
+                for (int o = 0; o < result[i].Length; o++)
+                {
+                    result[i][o] = -1;
+                }
+            }
+            //This UVMap coordinates to read the patterns
+            int pattern_x = 0;
+            int pattern_y = 0;
             //Go around the collapsed array
             for (int y = 0; y < coll_size; y++)
             {
@@ -69,22 +79,69 @@ namespace WaveFunctionCollapse
                     if (list_value == null)
                     {
                         //This pattern has not been observed
-                        FillArray(result ,-2, patterns,new Vector2(x,y));
+                        result[x][y] = -1;
+                        //FillArray(result ,-2, patterns,new Vector2(x,y));
                     }
                     else if (list_value.Count != 1)
                     {
+                        result[x][y] = 9;
+
                         //This pattern has been observed but it is overlapping
-                        FillArray(result, -1, patterns, new Vector2(x, y));
+                        //FillArray(result, -1, patterns, new Vector2(x, y));
 
                     }
                     else
                     {
+                        //Find the pattern
+                        int pattern_index = coll[x][y][0];
+                        //Assign value using coordinates
+                        result[x][y] = patterns[pattern_index].values[pattern_x][pattern_y];
+
+                        //Save computations by finding offset right away
+                        //Since patterns are stored clockwise
+                        //But the output array is stored cartesi anally
+
+
+                        int offset_x = pattern_x + 1;
+                        if (offset_x >= pattern_size)
+                            offset_x = 0;
+                        int offset_y = pattern_y + 1;
+                        if (offset_y >= pattern_size)
+                            offset_y = 0;
+
+
+                        if (y % 2 == 0)
+                        {
+                            if (x % 2 == 0)
+                                result[x][y] = patterns[pattern_index].values[offset_x][pattern_y];
+                            else
+                                result[x][y] = patterns[pattern_index].values[pattern_x][pattern_y]; 
+                        } else
+                        {
+                            if (x % 2 != 0)
+                                result[x][y] = patterns[pattern_index].values[pattern_x][offset_y];
+                            else
+                                result[x][y] = patterns[pattern_index].values[offset_x][offset_y];
+
+                        }
+
+
+
+                        //result[x][y] = pattern_index;
+
                         //This pattern has been observed and has collapsed
-                        FillArray(result, list_value[0], patterns, new Vector2(x, y));
+                        //FillArray(result, list_value[0], patterns, new Vector2(x, y));
 
                     }
+                    //Get the coordinates in the pattern boundaries
+                    pattern_x++;
+                    if (pattern_x >= pattern_size)
+                        pattern_x = 0;
 
                 }
+                pattern_y++;
+                if (pattern_y >= pattern_size)
+                    pattern_y = 0;
             }
             return result;
         }
