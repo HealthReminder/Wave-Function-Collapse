@@ -326,6 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pattern_size: 2
+  input_map: {fileID: 0}
 --- !u!4 &985082320
 Transform:
   m_ObjectHideFlags: 0

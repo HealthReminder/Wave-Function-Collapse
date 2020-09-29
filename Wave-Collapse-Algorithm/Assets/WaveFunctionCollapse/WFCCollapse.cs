@@ -9,7 +9,7 @@ namespace WaveFunctionCollapse
     {
         //COMECA A TRANSFORMAR ESSA COROTINA NA ROTINA DO TESTER
         //AQUI SO TERA FUNCOES QUE RETORNAM TIPOS E NO ROUTINAS
-        public static void CollapseCell(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
+        public static void CollapseCell(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, Vector2 first_collapsed, int collapse_into = -1)
         {
             List<int> cell = coll[(int)coords.x][(int)coords.y];
             if (cell == null)
@@ -43,9 +43,9 @@ namespace WaveFunctionCollapse
             entr[(int)coords.x][(int)coords.y] = -1;
 
             //Propagate to neihgbors
-            Propagate(coll, entr, coords, patterns);
+            Propagate(coll, entr, coords, patterns, first_collapsed);
         }
-        public static Vector2 CollapseHyperCell(List<int>[][] coll, int[][] entr, List<Pattern> patterns)
+        public static Vector2 CollapseHyperCell(List<int>[][] coll, int[][] entr, List<Pattern> patterns, Vector2 first_collapsed)
         {
             //This function should be called only once, ideally
             //Get a list of hyper cells
@@ -61,12 +61,12 @@ namespace WaveFunctionCollapse
             int index = Random.Range(0, hyperstates.Count);
             int i = (int)hyperstates[index].x; int o = (int)hyperstates[index].y;
             coll[i][o] = GetHyperstate(patterns);
-            CollapseCell(coll, entr, new Vector2(i, o), patterns);
+            CollapseCell(coll, entr, new Vector2(i, o), patterns,first_collapsed);
 
             //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
             return hyperstates[index];
         }
-        public static void CollapseMostProbable(List<int>[][] coll, int[][] entr, List<Pattern> patterns)
+        public static void CollapseMostProbable(List<int>[][] coll, int[][] entr, List<Pattern> patterns, Vector2 first_collapsed)
         {
             if (coll == null)
                 Debug.LogError("Cannot calculate lowest entropy of null array.");
@@ -93,7 +93,7 @@ namespace WaveFunctionCollapse
             if (highest_entropy == 0)
             {
                 Debug.LogWarning("Ideally this should not be called?");
-                CollapseHyperCell(coll, entr, patterns);
+                CollapseHyperCell(coll, entr, patterns, first_collapsed);
             }
             else
             {
@@ -104,7 +104,7 @@ namespace WaveFunctionCollapse
                             possible_cells.Add(new Vector2(x, y));
                 //0 will always be the cell in the middle. The others are its neighbors if any
                 Vector2 r_cell = possible_cells[Random.Range(0, possible_cells.Count)];
-                CollapseCell(coll, entr, r_cell, patterns);
+                CollapseCell(coll, entr, r_cell, patterns,first_collapsed);
 
             }
             //Debug.Log("Chosen cell " + chosen_cell + " within cells of entropy of " + lowest_entropy);
@@ -116,7 +116,7 @@ namespace WaveFunctionCollapse
             //Debug.Log(DebugCells(cells));
             //Debug.Log(DebugCells(cells, false));
         }
-        static void Propagate(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns)
+        static void Propagate(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, Vector2 first_collapsed)
         {
             int cx, cy;
             cx = (int)coords.x; cy = (int)coords.y;
@@ -187,7 +187,10 @@ namespace WaveFunctionCollapse
                             //If there is no solution leave the last solution as the only possible
                             if (!is_valid && current_possibilities.Count > 1)
                                 current_possibilities.RemoveAt(c);
+                            else if(!is_valid && current_possibilities.Count == 1)
+                                Debug.LogWarning("Invalid!");
                         }
+                        //if (current_possibilities.Count == 1)
                         coll[(int)neighbors[side].x][(int)neighbors[side].y] = current_possibilities;
                         //Debug.Log(current_possibilities.Count);
                         //Debug.Log("Neighbor has " + current_possibilities.Count + " current possibilities");
@@ -206,10 +209,16 @@ namespace WaveFunctionCollapse
                     //If this neighbor was collapsed make it 9* so it must collapse after
                     if (entr[x][y] != -1)
                     {
+                        int dist_epicenter = (int)Vector2.Distance(first_collapsed, neighbors[i]);
+                        int priority = GetCollapsedNeighborCount(x, y, entr) + 1;
+
+                        entr[x][y] = (coll[x][y].Count * priority)*10 / (dist_epicenter);
+
                         if (coll[x][y].Count == 1)
-                            entr[x][y] = (int)Mathf.Pow(GetCollapsedNeighborCount(x, y, entr) + 1, 2);
-                        else
-                            entr[x][y] = coll[x][y].Count * (GetCollapsedNeighborCount(x, y, entr) + 1);
+                            entr[x][y] *=10;
+
+
+                        //Debug.Log(entr[x][y]);
                     }
                 }
             }
@@ -221,7 +230,7 @@ namespace WaveFunctionCollapse
             if (y - 1 >= 0)
             {
                 if (entr[x][y - 1] == -1)
-                    count++;
+                    count += 2;
             }
             else
                 count++;
@@ -229,7 +238,7 @@ namespace WaveFunctionCollapse
             if (x + 1 < entr.Length)
             {
                 if (entr[x + 1][y] == -1)
-                    count++;
+                    count += 2;
             }
             else
                 count++;
@@ -238,7 +247,7 @@ namespace WaveFunctionCollapse
             if (y + 1 < entr[0].Length)
             {
                 if (entr[x][y + 1] == -1)
-                    count++;
+                    count += 2;
             }
             else
                 count++;
@@ -247,14 +256,14 @@ namespace WaveFunctionCollapse
             if (x - 1 >= 0)
             {
                 if (entr[x - 1][y] == -1)
-                    count++;
+                    count+=2;
             }
             else
                 count++;
 
 
             //Debug.Log("Cell has " + count + "collapsed neighbors");
-            return (count);
+            return (count*count);
         }
         public static List<int> GetHyperstate(List<Pattern> patterns)
         {
@@ -263,7 +272,6 @@ namespace WaveFunctionCollapse
                 p.Add(i);
             return p;
         }
-
         static int GetHighestEntropy(int[][] arr)
         {
             //This function is used to get the lowest number of possible combinations in the board

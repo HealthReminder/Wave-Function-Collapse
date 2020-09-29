@@ -6,6 +6,7 @@ using WaveFunctionCollapse;
 public class Tester : MonoBehaviour
 {
     public int pattern_size = 3;
+    public Texture2D input_map;
     #region Active
     int[][] input;
     int[][] offset;
@@ -81,7 +82,7 @@ public class Tester : MonoBehaviour
         #region WFC Algorithm
         //FOR DEBUG ONLY
         initial_pattern = 1;
-
+        Vector2 initial_collapse;
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
         if (initial_pattern != -1)
         {
@@ -89,13 +90,13 @@ public class Tester : MonoBehaviour
                 initial_x = 2;//Random.Range(0, output_size);
             if (initial_y == -1)
                 initial_y = 2;//Random.Range(0, output_size);
-            Vector2 coord = new Vector2(initial_x, initial_y);
+            initial_collapse = new Vector2(initial_x, initial_y);
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
-            WFCCollapse.CollapseCell(collapsing, entropy, coord, all_patterns, initial_pattern);
+            WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_collapse, initial_pattern);
             //After collapse, remove from infinite list
             Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count);
         } else
-            WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
+            initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns, new Vector2(-1,-1));
         
         string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
@@ -115,7 +116,7 @@ public class Tester : MonoBehaviour
         {
             for (int t = 0; t < 999; t++)
             {
-                WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
+                WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns, initial_collapse);
 
                 //READ COLLAPSING
                 //log = ReadArrayList(collapsing);
@@ -225,13 +226,18 @@ public class Tester : MonoBehaviour
         }
         //Results axis-inverted inputs
         List<int[]> lists = new List<int[]>();
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
-        lists.Add(new int[5] { 0, 4, 0, 0, 0 });
-        lists.Add(new int[5] { 0, 0, 4, 0, 2 });
-        lists.Add(new int[5] { 0, 0, 0, 0, 0 });
-        lists.Add(new int[5] { 1, 1, 1, 1, 1 });
-        result = lists.ToArray();
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 6, 1, 1, 2, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 3, 0, 0, 3, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 3, 0, 0, 3, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 5, 1, 1, 4, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 8, 8 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 8, 8 });
 
+        result = lists.ToArray();
         return result;
     }
     #endregion
