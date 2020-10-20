@@ -79,12 +79,12 @@ namespace WaveFunctionCollapse
                     if (list_value == null)
                     {
                         //This pattern has not been observed
-                        result[x][y] = -1;
+                        result[x][y] = -2;
                         //FillArray(result ,-2, patterns,new Vector2(x,y));
                     }
                     else if (list_value.Count != 1)
                     {
-                        result[x][y] = 9;
+                        result[x][y] = -1;
 
                         //This pattern has been observed but it is overlapping
                         //FillArray(result, -1, patterns, new Vector2(x, y));
@@ -124,9 +124,6 @@ namespace WaveFunctionCollapse
                                 result[x][y] = patterns[pattern_index].values[offset_x][offset_y];
 
                         }
-
-
-
                         //result[x][y] = pattern_index;
 
                         //This pattern has been observed and has collapsed
@@ -144,43 +141,6 @@ namespace WaveFunctionCollapse
                     pattern_y = 0;
             }
             return result;
-        }
-        static void FillArray(int[][] arr, int val, List<Pattern> pat, Vector2 coords)
-        {
-            int ps = pat[0].values.Length;
-
-            int x = (int)coords.x * ps;
-            int y = (int)coords.y * ps;
-            //This function will fill the cells in the resulting output array
-            if (val == -2)
-            {
-                for (int o = 0; o < ps; o++)
-                {
-                    for (int i = 0; i < ps; i++)
-                    {
-                        arr[x + i][y + o] = 6; 
-                    }
-                }
-            } else if (val == -1)
-            {
-                for (int o = 0; o < ps; o++)
-                {
-                    for (int i = 0; i < ps; i++)
-                    {
-                        arr[x + i][y + o] = 5;
-                    }
-                }
-            } else if(val >= 0 && val < pat.Count)
-            {
-                int[][] v = pat[val].values;
-                for (int o = 0; o < ps; o++)
-                {
-                    for (int i = 0; i < ps; i++)
-                    {
-                        arr[x + i][y + o] = v[i][o];
-                    }
-                }
-            }
         }
     }
 }

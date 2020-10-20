@@ -236,16 +236,6 @@ namespace WaveFunctionCollapse
                         return false;
             return true;
         }
-        //static int[] ArrayInvert(int[] original)
-        //{
-            //Tested
-        //    List<int> result = new List<int>();
-        //    for (int i = original.Length - 1; i >= 0; i--)
-        //    {
-        //        result.Add(original[i]);
-        //    }
-        //    return result.ToArray();
-        //}
 
     }
 }

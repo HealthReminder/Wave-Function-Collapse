@@ -142,7 +142,7 @@ namespace WaveFunctionCollapse
                 neighbors[3] = (new Vector2(cx - 1, cy));
 
             //Debug.Log(neighbors[0] + " / " + neighbors[1] + " / " + neighbors[2] + " / " + neighbors[3]);
-
+            bool is_valid = true;
             //All the neighbors of the main cell will be restricted to its possible neighbors
             for (int side = 0; side < neighbors.Length; side++)
             {
@@ -168,31 +168,43 @@ namespace WaveFunctionCollapse
                         //Debug.Log("This neighbor should have set solutions already.");
                         //Go through the current solutions 
                         //Record solutions that must be removed
+                        List<int> original_cell = coll[(int)neighbors[side].x][(int)neighbors[side].y];
                         List<int> current_possibilities = new List<int>();
-                        for (int i = 0; i < coll[(int)neighbors[side].x][(int)neighbors[side].y].Count; i++)
-                            current_possibilities.Add(coll[(int)neighbors[side].x][(int)neighbors[side].y][i]);
+                        for (int i = 0; i < original_cell.Count; i++)
+                            current_possibilities.Add(original_cell[i]);
                         //Debug.Log(current_possibilities.Count);
                         //Debug.Log("Working on cell with " + current_possibilities.Count + " solutions and entropy of "+entropy);
                         //ERROR HERE
                         int iterations = current_possibilities.Count - 1;
-                        bool is_valid;
+                        bool is_contained;
                         //Of current possibilities
                         for (int c = iterations; c >= 0; c--)
                         {
                             //Flag the ones that are no valid
-                            is_valid = false;
+                            is_contained = false;
                             foreach (int p in new_possibilities)
                                 if (current_possibilities[c] == p)
-                                    is_valid = true;
+                                    is_contained = true;
                             //If there is no solution leave the last solution as the only possible
-                            if (!is_valid && current_possibilities.Count > 1)
+                            if (!is_contained && current_possibilities.Count > 1)
                                 current_possibilities.RemoveAt(c);
-                            else if(!is_valid && current_possibilities.Count == 1)
+                            else if (!is_contained && current_possibilities.Count == 1)
+                            {
+                                is_valid = false;
+                                //This is a conflicting result
+                                //The cell must collapse from the last state of the list
+                                //The cell is flagged to be collapsed immediatelly
+                                current_possibilities.Clear();
+                                //current_possibilities = original_cell;
+                                //Or maybe it can only collapse in the most probable solution on the board
+                                for (int i = 0; i < original_cell.Count; i++)
+                                    current_possibilities.Add(original_cell[i]);
+                                for (int i = 0; i < new_possibilities.Count; i++)
+                                    current_possibilities.Add(new_possibilities[i]);
                                 Debug.LogWarning("Invalid!");
+                            }
                         }
-                        //if (current_possibilities.Count == 1)
                         coll[(int)neighbors[side].x][(int)neighbors[side].y] = current_possibilities;
-                        //Debug.Log(current_possibilities.Count);
                         //Debug.Log("Neighbor has " + current_possibilities.Count + " current possibilities");
 
                     }
@@ -209,14 +221,20 @@ namespace WaveFunctionCollapse
                     //If this neighbor was collapsed make it 9* so it must collapse after
                     if (entr[x][y] != -1)
                     {
-                        int dist_epicenter = (int)Vector2.Distance(first_collapsed, neighbors[i]);
-                        int priority = GetCollapsedNeighborCount(x, y, entr) + 1;
+                        //int dist_epicenter = (int)Vector2.Distance(first_collapsed, neighbors[i]);
 
-                        entr[x][y] = (coll[x][y].Count * priority)*10 / (dist_epicenter);
+                        //int count = coll[x][y].Count; count *= count;
+                        //entr[x][y] = (count * priority)*10 / (dist_epicenter);
 
+                        
+
+                        int modifier = GetCollapsedNeighborCount(x, y, entr) + 1;
+                        entr[x][y] = modifier;
+
+                        if (!is_valid)
+                            entr[x][y] *= 3;
                         if (coll[x][y].Count == 1)
-                            entr[x][y] *=10;
-
+                            entr[x][y] *= 2;
 
                         //Debug.Log(entr[x][y]);
                     }

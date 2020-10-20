@@ -6,6 +6,7 @@ using WaveFunctionCollapse;
 public class Tester : MonoBehaviour
 {
     public int pattern_size = 3;
+    public int output_size = 30;
     public Texture2D input_map;
     #region Active
     int[][] input;
@@ -15,6 +16,7 @@ public class Tester : MonoBehaviour
     List<int>[][] collapsing;
     int[][] entropy;
     int[][] output;
+    char[][] result;
 
 
     private void Start()
@@ -25,14 +27,14 @@ public class Tester : MonoBehaviour
     IEnumerator Test()
     {
         input = GenerateInput();
-        Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArray(input));
+        Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArrayInt(input));
         offset = WFCInputOutput.GetOffsetArray(input, pattern_size);
-        Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArray(offset));
+        Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArrayInt(offset));
 
 
         var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
         pattern = pattern_info.pattern_array;
-        Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArray(pattern));
+        Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArrayInt(pattern));
         unique = pattern_info.pattern_list;
 
         string log = "";
@@ -57,7 +59,7 @@ public class Tester : MonoBehaviour
 
         //Output an array of patterns of X size according to a pattern list
         //Optional parameters to include a preset first cell
-        yield return CollapseArray(pattern_size*10, unique, 1);
+        yield return CollapseArray(output_size, unique, 1);
 
         Debug.Log("Finished test routine.");
         yield break;
@@ -94,20 +96,23 @@ public class Tester : MonoBehaviour
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
             WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_collapse, initial_pattern);
             //After collapse, remove from infinite list
-            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from "+all_patterns.Count);
+            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from " + all_patterns.Count);
         } else
-            initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns, new Vector2(-1,-1));
-        
+            initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns, new Vector2(-1, -1));
+
         string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
 
-        //log = ReadArray(entropy);
-        //Debug.Log("<color=blue> Initial entropy collapse: </color> \n" + log);
+
+        Debug.Log("<color=yellow> " + "Interpreted input array" + " collapse: </color> \n" + ReadArrayChar(InterpretOutput(input)));
 
         //READ OUTPUT
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-        log = ReadArray(output);
-        Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
+        //log = ReadArray(output);
+        //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
+        result = InterpretOutput(output);
+        log = ReadArrayChar(result);
+        Debug.Log("<color=green> " + "Initial interpreted output array" + " collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
@@ -124,25 +129,59 @@ public class Tester : MonoBehaviour
 
                 //READ ENTROPY
                 //log = ReadArray(entropy);
-               // Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
+                // Debug.Log("<color=blue> " + "Test" + " collapse: </color> \n" + log);
 
                 //READ OUTPUT
                 output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-                log = ReadArray(output);
-                Debug.Log("<color=magenta> " + "Output array" + " collapse: </color> \n" + log);
+                //log = ReadArrayInt(output);
+                //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
+                result = InterpretOutput(output);
+                log = ReadArrayChar(result);
+                Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
                 if (CheckValidity(entropy, output_size))
                     break;
             }
-            is_valid = CheckValidity(entropy,output_size);
+            is_valid = CheckValidity(entropy, output_size);
         }
         //Creation was successful!
         //Generate the output
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-        log = ReadArray(output);
+        log = ReadArrayInt(output);
         Debug.Log("<color=magenta> " + "Output array" + " collapse: </color> \n" + log);
         #endregion
         yield break;
+    }
+    char[][] InterpretOutput(int[][] arr)
+    {
+        //This should be provided by the reading of the input tileset
+        char char_invalid = '?';
+        List<char> char_list = new List<char>() { '░', '▒', '▒', '▓', '▓', '▒', '░', '▒', '▓', '▓' };
+
+        //Setup result array
+        int h = arr.Length;
+        int w = arr[0].Length;
+        char[][] result = new char[h][];
+        for (int y = 0; y < h; y++)
+            result[y] = new char[w];
+
+        //Convert index into chars
+        //Or tiles
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                result[x][y] = char_invalid;
+                //Debug.Log("1");
+                int i = arr[x][y];
+                //Debug.Log(i);
+                if (i >= 0 && i < char_list.Count)
+                    result[x][y] = char_list[i];
+                //Debug.Log("3");
+
+            }
+        }
+        return result;
     }
     void SetupCollapseArrays(int s)
     {
@@ -225,17 +264,28 @@ public class Tester : MonoBehaviour
             }
         }
         //Results axis-inverted inputs
-        List<int[]> lists = new List<int[]>();
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 6, 1, 1, 2, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 3, 0, 0, 3, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 3, 0, 0, 3, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 5, 1, 1, 4, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 8, 8 });
-        lists.Add(new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 8, 8 });
+        List<int[]> lists = new List<int[]>();/*
+        lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 9 });
+        lists.Add(new int[10] { 0, 0, 2, 3, 4, 3, 5, 0, 0, 1 });
+        lists.Add(new int[10] { 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 });
+        lists.Add(new int[10] { 1, 1, 6, 0, 0, 0, 6, 1, 1, 6 });
+        lists.Add(new int[10] { 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 });
+        lists.Add(new int[10] { 0, 0, 8, 3, 4, 3, 7, 0, 0, 1 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 9 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        */
+        lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 4, 4, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 4, 4, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
+        lists.Add(new int[10] { 3, 2, 2, 2, 3, 2, 2, 2, 2, 2 });
 
         result = lists.ToArray();
         return result;
@@ -269,7 +319,29 @@ public class Tester : MonoBehaviour
         }
         return log;
     }
-    string ReadArray(int[][] arr)
+    string ReadArrayChar(char[][] arr)
+    {
+        string log = "";
+        if (arr == null)
+            log += ("NULL INT ARRAY");
+        else
+        {
+            for (int y = 0; y < arr.Length; y++)
+            {
+                for (int x = 0; x < arr[y].Length; x++)
+                {
+                    log += arr[x][y];
+                }
+                log += "\n";
+
+            }
+            log += "\n";
+        }
+
+        log += "\n";
+        return log;
+    }
+    string ReadArrayInt(int[][] arr)
     {
         string log = "";
         if (arr == null)
