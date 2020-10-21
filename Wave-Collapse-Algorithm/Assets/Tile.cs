@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public int type;
+    [HideInInspector]   public int type;
 }

@@ -1,10 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using WaveFunctionCollapse;
 
 public class Tester : MonoBehaviour
 {
+    #region Input
+    //These unique objects must be cached by the main routine
+    //It is a list that composes the tileset
+    public Tile[] tiles;
+    //Dataset size is the size of the side of the square 
+    //Or grid that represents the dataset
+    //This script only works on square matrix
+    public Tile[] dataset;
+    int[][] output_for_display;
+    #endregion
+    #region WFC
     public int pattern_size = 3;
     public int output_size = 30;
     public Texture2D input_map;
@@ -17,16 +29,22 @@ public class Tester : MonoBehaviour
     int[][] entropy;
     int[][] output;
     char[][] result;
-
+    #endregion
+    #endregion
 
     private void Start()
     {
         StartCoroutine(Test());
+        StartCoroutine(ReloadScene(3));
     }
-
+    IEnumerator ReloadScene(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     IEnumerator Test()
     {
-        input = GenerateInput();
+        input = InputReader.GetInput(dataset);
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArrayInt(input));
         offset = WFCInputOutput.GetOffsetArray(input, pattern_size);
         Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArrayInt(offset));
@@ -61,8 +79,35 @@ public class Tester : MonoBehaviour
         //Optional parameters to include a preset first cell
         yield return CollapseArray(output_size, unique, 1);
 
+        StartCoroutine(InstantiateOutput(output, tiles));
+
         Debug.Log("Finished test routine.");
         yield break;
+    }
+    public static IEnumerator InstantiateOutput(int[][] indexes, Tile[] tiles)
+    {
+        int side = indexes.Length;
+        int l = tiles.Length;
+        for (int y = 0; y < side; y++)
+        {
+            for (int x = 0; x < side; x++)
+            {
+                int index = -1;
+                int type = indexes[x][y];
+                for (int i = 0; i < l; i++)
+                {
+                    if (tiles[i].type == type)
+                        index = i;
+                }
+
+                if (index == -1)
+                    Debug.LogError("Could not find matching tile in tileset to instantiate output.");
+
+                Instantiate(tiles[index], new Vector3(x, -10, -y), Quaternion.identity);
+            }
+        }
+
+        yield return null;
     }
     IEnumerator CollapseArray(int output_size, List<Pattern> all_patterns, int initial_pattern = -1, int initial_x = -1, int initial_y = -1)
     {
@@ -214,9 +259,8 @@ public class Tester : MonoBehaviour
         }
         return true;
     }
-    #endregion
     #region Input
-    int[][] GenerateInput()
+    /*int[][] GenerateInput()
     {
         //Creates a list so the numbers can be changed on the fly
         int[][] result;
@@ -275,7 +319,7 @@ public class Tester : MonoBehaviour
         lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 9 });
         lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
         lists.Add(new int[10] { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 });
-        */
+        
         lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
         lists.Add(new int[10] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -289,7 +333,7 @@ public class Tester : MonoBehaviour
 
         result = lists.ToArray();
         return result;
-    }
+    }*/
     #endregion
     #region Debug
     string ReadList(List<int> list)
