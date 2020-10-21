@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public string type;
+    public int type;
 }

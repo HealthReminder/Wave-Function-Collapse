@@ -37,54 +37,60 @@ namespace WaveFunctionCollapse
             int[][] output = SetupOutput(side);
 
             //Order received input by position
-            List<Tile> tiles = new List<Tile>();
+            List<Tile> unordered = new List<Tile>();
             for (int i = 0; i < total; i++)
-                tiles.Add(dataset[i]);
+                unordered.Add(dataset[i]);
 
             //Sort by Y
             //for (int i = 0; i < total; i++)
             //objs.OrderBy(o => o.transform.position.y);
 
-            //Sort by X
-            List<Vector3> ordered_pos = new List<Vector3>();
+            //Sort by distance
+            List<Vector3> positions = new List<Vector3>();
             for (int i = 0; i < total; i++)
-                ordered_pos.Add(dataset[i].transform.position);
-            ordered_pos.Sort(CompareVector3);
+                positions.Add(dataset[i].transform.position);
+            positions.Sort(CompareVector3);
             for (int i = 0; i < total; i++)
             {
-                Debug.Log(ordered_pos[i]);
+                Debug.Log(positions[i]);
+
             }
 
-            tiles.OrderBy(o => o.transform.position);
-
+            //Populate tiles again
+            List<Tile> ordered = new List<Tile>();
+            for (int i = 0; i < positions.Count; i++)
+            {
+                int matching_index = 0;
+                for (int o = 0; o < unordered.Count; o++)
+                {
+                    if (unordered[o].transform.position == positions[i])
+                        matching_index = o;
+                }
+                ordered.Add(unordered[matching_index]);
+            }
+            if (ordered.Count < total)
+                Debug.LogError("Missed tile in ordering routine.");
            
             //Label tilest
             for (int i = 0; i < total; i++)
             {
 
-                tiles[i].gameObject.name = ((int)tiles[i].transform.position.x).ToString() + "/" + ((int)tiles[i].transform.position.z).ToString();
+                ordered[i].gameObject.name = ((int)ordered[i].transform.position.x).ToString() + "/" + ((int)ordered[i].transform.position.z).ToString();
+                //Move dataset for debug purposes
+                ordered[i].transform.position += new Vector3(0, (ordered[i].transform.position.x*side + ordered[i].transform.position.z*2)/10, 0);
             }
 
-            
-
             //Populate output array
-            for (int x = 0; x < side; x++)
+            for (int y = 0; y < side; y++)
             {
-                for (int y = 0; y < side; y++)
+                for (int x = 0; x < side; x++)
                 {
                     //Find the index in the tileset
-                    bool found = false;
                     int r = -1;
-                    for (int i = 0; i < tileset.Length; i++)
-                    {
-                        if (tiles[x + y * side].type == tileset[i].type)
-                        {
-                            r = i;
-                            found = true;
-                        }
-                    }
+                    //Goes by each x and add the row using the side -1 to keep it in boundaries
+                    r = ordered[x + y * (side - 1) + y].type;
                     output[x][y] = r;
-                    if (!found)
+                    if (r == -1)
                         Debug.LogWarning("Did not find object in tileset. Defaulting to -1.");
                 }
             }
