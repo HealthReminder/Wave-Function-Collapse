@@ -83,7 +83,8 @@ namespace WaveFunctionCollapse
                 }
             }
             
-            //Debug.Log(ReadArrayInt(output));
+
+            Debug.Log(ReadArrayInt(output));
             return (output);
         }
         static int CompareVector3(Vector3 v1, Vector3 v2)
@@ -114,6 +115,28 @@ namespace WaveFunctionCollapse
                     r[x][y] = -1;
 
             return r;
+        }
+        static string ReadArrayInt(int[][] arr)
+        {
+            string log = "";
+            if (arr == null)
+                log += ("NULL INT ARRAY");
+            else
+            {
+                for (int y = 0; y < arr.Length; y++)
+                {
+                    for (int x = 0; x < arr[y].Length; x++)
+                    {
+                        log += arr[x][y];
+                    }
+                    log += "\n";
+
+                }
+                log += "\n";
+            }
+
+            log += "\n";
+            return log;
         }
     }
 }

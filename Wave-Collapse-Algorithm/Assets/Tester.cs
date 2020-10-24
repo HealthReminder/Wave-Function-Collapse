@@ -9,11 +9,13 @@ public class Tester : MonoBehaviour
     #region Input
     //These unique objects must be cached by the main routine
     //It is a list that composes the tileset
-    public Tile[] tiles;
+    public Transform tileset_transform;
+    Tile[] tiles;
     //Dataset size is the size of the side of the square 
     //Or grid that represents the dataset
     //This script only works on square matrix
-    public Tile[] dataset;
+    public Transform dataset_transform;
+    Tile[] dataset;
     int[][] output_for_display;
     #endregion
     #region WFC
@@ -44,6 +46,12 @@ public class Tester : MonoBehaviour
     }
     IEnumerator Test()
     {
+        //Get the tileset and dataset from the respective transforms
+        tiles = tileset_transform.GetComponentsInChildren<Tile>();
+        dataset = dataset_transform.GetComponentsInChildren<Tile>();
+        Debug.Log("<color=green> Got tileset of size: " + tiles.Length + ". Got dataset of size: " + dataset.Length + "\n</color> ");
+
+
         input = InputReader.GetInput(dataset);
         Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArrayInt(input));
         offset = WFCInputOutput.GetOffsetArray(input, pattern_size);
@@ -178,11 +186,11 @@ public class Tester : MonoBehaviour
 
                 //READ OUTPUT
                 output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-                //log = ReadArrayInt(output);
-                //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
-                result = InterpretOutput(output);
-                log = ReadArrayChar(result);
-                Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
+                log = ReadArrayInt(output);
+                Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
+                //result = InterpretOutput(output);
+                //log = ReadArrayChar(result);
+                //Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
                 if (CheckValidity(entropy, output_size))
                     break;

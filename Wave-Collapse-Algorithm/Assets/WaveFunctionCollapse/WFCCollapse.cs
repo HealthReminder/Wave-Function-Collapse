@@ -202,6 +202,10 @@ namespace WaveFunctionCollapse
                                 for (int i = 0; i < new_possibilities.Count; i++)
                                     current_possibilities.Add(new_possibilities[i]);
                                 Debug.LogWarning("Invalid!");
+
+                                //Or maybe it could just default to grass! YOLO!
+                                //current_possibilities.Clear();
+                                //current_possibilities.Add(0);
                             }
                         }
                         coll[(int)neighbors[side].x][(int)neighbors[side].y] = current_possibilities;
