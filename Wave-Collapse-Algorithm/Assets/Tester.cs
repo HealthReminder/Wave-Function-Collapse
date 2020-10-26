@@ -10,6 +10,7 @@ public class Tester : MonoBehaviour
     //These unique objects must be cached by the main routine
     //It is a list that composes the tileset
     public Transform tileset_transform;
+    public Tile invalid_tile;
     Tile[] tiles;
     //Dataset size is the size of the side of the square 
     //Or grid that represents the dataset
@@ -21,7 +22,6 @@ public class Tester : MonoBehaviour
     #region WFC
     public int pattern_size = 3;
     public int output_size = 30;
-    public Texture2D input_map;
     #region Active
     int[][] input;
     int[][] offset;
@@ -87,12 +87,12 @@ public class Tester : MonoBehaviour
         //Optional parameters to include a preset first cell
         yield return CollapseArray(output_size, unique, 1);
 
-        StartCoroutine(InstantiateOutput(output, tiles));
+        StartCoroutine(InstantiateOutput(output, tiles, invalid_tile));
 
         Debug.Log("Finished test routine.");
         yield break;
     }
-    public static IEnumerator InstantiateOutput(int[][] indexes, Tile[] tiles)
+    public static IEnumerator InstantiateOutput(int[][] indexes, Tile[] tiles, Tile invalid_tile)
     {
         int side = indexes.Length;
         int l = tiles.Length;
@@ -109,9 +109,13 @@ public class Tester : MonoBehaviour
                 }
 
                 if (index == -1)
-                    Debug.LogError("Could not find matching tile in tileset to instantiate output.");
+                    Instantiate(invalid_tile, new Vector3(x+250, -10, -y + 250), Quaternion.identity);
+                 else
+                {
+                    Instantiate(tiles[index], new Vector3(x + 250, -10, -y + 250), Quaternion.identity);
 
-                Instantiate(tiles[index], new Vector3(x, -10, -y), Quaternion.identity);
+                }
+
             }
         }
 
@@ -147,11 +151,11 @@ public class Tester : MonoBehaviour
                 initial_y = 2;//Random.Range(0, output_size);
             initial_collapse = new Vector2(initial_x, initial_y);
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
-            WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_collapse, initial_pattern);
+            WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_pattern);
             //After collapse, remove from infinite list
             Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from " + all_patterns.Count);
         } else
-            initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns, new Vector2(-1, -1));
+            initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
 
         string log = ReadArrayList(collapsing);
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
@@ -174,7 +178,7 @@ public class Tester : MonoBehaviour
         {
             for (int t = 0; t < 999; t++)
             {
-                WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns, initial_collapse);
+                WFCCollapse.CollapseMostProbable(collapsing, entropy, all_patterns);
 
                 //READ COLLAPSING
                 //log = ReadArrayList(collapsing);

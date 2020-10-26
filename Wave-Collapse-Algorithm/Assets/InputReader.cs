@@ -29,20 +29,11 @@ namespace WaveFunctionCollapse
             for (int i = 0; i < total; i++)
                 unordered.Add(dataset[i]);
 
-            //Sort by Y
-            //for (int i = 0; i < total; i++)
-            //objs.OrderBy(o => o.transform.position.y);
-
             //Sort by distance
             List<Vector3> positions = new List<Vector3>();
             for (int i = 0; i < total; i++)
                 positions.Add(dataset[i].transform.position);
             positions.Sort(CompareVector3);
-            for (int i = 0; i < total; i++)
-            {
-                Debug.Log(positions[i]);
-
-            }
 
             //Populate tiles again
             List<Tile> ordered = new List<Tile>();
