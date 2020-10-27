@@ -146,9 +146,9 @@ public class Tester : MonoBehaviour
         if (initial_pattern != -1)
         {
             if (initial_x == -1)
-                initial_x = 2;//Random.Range(0, output_size);
+                initial_x = 0;//Random.Range(0, output_size);
             if (initial_y == -1)
-                initial_y = 2;//Random.Range(0, output_size);
+                initial_y = 0;//Random.Range(0, output_size);
             initial_collapse = new Vector2(initial_x, initial_y);
             collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
             WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_pattern);
@@ -199,6 +199,7 @@ public class Tester : MonoBehaviour
                 if (CheckValidity(entropy, output_size))
                     break;
             }
+            yield return null;
             is_valid = CheckValidity(entropy, output_size);
         }
         //Creation was successful!

@@ -224,20 +224,11 @@ namespace WaveFunctionCollapse
                     //If this neighbor was collapsed make it 9* so it must collapse after
                     if (entr[x][y] != -1)
                     {
-                        //int dist_epicenter = (int)Vector2.Distance(first_collapsed, neighbors[i]);
+                        int entropy;
+                        //int dist_epicenter = (int)(10*Vector2.Distance(new Vector3(0,0,0), neighbors[i])+1);
 
-                        //int count = coll[x][y].Count; count *= count;
-                        //entr[x][y] = (count * priority)*10 / (dist_epicenter);
-
-                        int entropy = 1;
-
-                        //if (is_valid)
-                        //    modifier *= 2;
-                        //if (coll[x][y].Count == 1)
-                        //    modifier *= 2;
                         if (!is_valid)
                         {
-                            entropy *= GetCollapsedNeighborCount(x, y, entr) + 1;
                             entr[x][y] = -1;
 
                         } else {
@@ -246,7 +237,8 @@ namespace WaveFunctionCollapse
                             {
                                 solution_qtd += patterns[coll[x][y][0]].possible_neighbors[o].Count;
                             }
-                            entropy = 100/solution_qtd;
+                            entropy = 1000/solution_qtd;
+                            //entropy *= dist_epicenter;
 
 
                             entropy *= GetCollapsedNeighborCount(x, y, entr) + 1;
