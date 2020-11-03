@@ -25,11 +25,8 @@ namespace WaveFunctionCollapse
                 for (int y = 0; y < s; y++)
                 {
                     for (int x = 0; x < s; x++)
-                    {
                         log += values[x][y];
-                    }
                     log += "\n";
-
                 }
             }
             return log;
@@ -37,10 +34,10 @@ namespace WaveFunctionCollapse
         public string GetNeighbors(List<Pattern> pattern_list)
         {
             string log = "";
+
             if (possible_neighbors == null)
                 return ("NO POSSIBLE NEIGHBORS");
             else
-            {
                 for (int i = 0; i < 4; i++)
                 {
                     log += "For side: " + i + "\n";
@@ -52,17 +49,13 @@ namespace WaveFunctionCollapse
                         for (int y = 0; y < s; y++)
                         {
                             for (int x = 0; x < s; x++)
-                            {
                                 log += pattern_list[possible_neighbors[i][o]].values[x][y];
-                            }
                             log += "\n";
-
                         }
                         log += "\n";
-
                     }
                 }
-            }
+
             return log;
         }
         public string GetFrequency()
