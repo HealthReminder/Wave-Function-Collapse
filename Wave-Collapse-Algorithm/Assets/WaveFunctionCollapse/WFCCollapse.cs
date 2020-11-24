@@ -229,7 +229,7 @@ namespace WaveFunctionCollapse
 
                         if (!is_valid)
                         {
-                            entr[x][y] = -1;
+                            entr[x][y] = 1;
 
                         } else {
                             int solution_qtd = 0;

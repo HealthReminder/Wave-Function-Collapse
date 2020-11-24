@@ -71,7 +71,7 @@ namespace WaveFunctionCollapse
             //Get sizes and setup result array
             int size_x = offset.Length;
             int size_y = offset[0].Length;
-            int[][] pattern_array = new int[size_x][];
+           int[][] pattern_array = new int[size_x][];
             for (int x = 0; x < size_x; x++)
                 pattern_array[x] = new int[size_x];
 
@@ -167,7 +167,6 @@ namespace WaveFunctionCollapse
 
             //For each unique pattern on list
             //Add the current array selection neighboring unique pattern indexes 
-
             //Setup neighbor patterns
             for (int i = 0; i < pat_list.Count; i++)
             {
@@ -175,6 +174,7 @@ namespace WaveFunctionCollapse
                 for (int o = 0; o < 4; o++)
                     pat_list[i].possible_neighbors[o] = new List<int>();
             }
+
             //Go through the pattern array 
             int l = arr.Length;
             for (int y = 0; y < l; y ++)
@@ -186,7 +186,6 @@ namespace WaveFunctionCollapse
                     if (index != -1)
                     {
                         Pattern current_pattern = pat_list[arr[x][y]];
-                        //Debug.Log("Getting neighbors for pattern " + arr[x][y]);
 
                         //Check if neighbor is valid
                         if (y - 1 >= 0)

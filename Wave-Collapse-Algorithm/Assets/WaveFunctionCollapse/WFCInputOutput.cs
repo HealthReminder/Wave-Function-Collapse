@@ -6,7 +6,7 @@ namespace WaveFunctionCollapse
 {
     public static class WFCInputOutput
     {
-        public static int[][] GetOffsetArray (int[][] input, int padding)
+        public static int[][] GetOffsetArray(int[][] input, int padding)
         {
             //Debug
             if (input == null)
@@ -53,12 +53,12 @@ namespace WaveFunctionCollapse
         public static int[][] GetOutputArray(List<int>[][] coll, List<Pattern> patterns, int pattern_size)
         {
             //Get useful variables
-            int coll_size = coll.Length;
+            int result_size = coll.Length * pattern_size;
             //Setup result array
             int[][] result;
-            result = new int[coll_size][];
+            result = new int[result_size][];
             for (int i = 0; i < result.Length; i++)
-                result[i] = new int[coll_size];
+                result[i] = new int[result_size];
 
             for (int i = 0; i < result.Length; i++)
             {
@@ -67,78 +67,70 @@ namespace WaveFunctionCollapse
                     result[i][o] = -1;
                 }
             }
-            //This UVMap coordinates to read the patterns
-            int pattern_x = 0;
-            int pattern_y = 0;
-            //Go around the collapsed array
-            for (int y = 0; y < coll_size; y++)
+            //Go on every pattern that will be in resulting array (therefore skipping by pattern size)
+            for (int y = 0; y < result_size; y += pattern_size)
             {
-                for (int x = 0; x < coll_size; x++)
+                for (int x = 0; x < result_size; x += pattern_size)
                 {
-                    List<int> list_value = coll[x][y];
-                    if (list_value == null)
+                    //X and Y represents the "pivot" of the current pattern being transcribed
+                    //Divide it by pattern size to cached the respective pattern
+                    List<int> possible_solutions = coll[x / pattern_size][y / pattern_size];
+
+                    //for each cell of the pattern fill it with the appropriate value
+                    for (int b = 0; b < pattern_size; b++)
                     {
-                        //This pattern has not been observed
-                        result[x][y] = -2;
-                        //FillArray(result ,-2, patterns,new Vector2(x,y));
-                    }
-                    else if (list_value.Count != 1)
-                    {
-                        result[x][y] = -1;
-
-                        //This pattern has been observed but it is overlapping
-                        //FillArray(result, -1, patterns, new Vector2(x, y));
-
-                    }
-                    else
-                    {
-                        //Find the pattern
-                        int pattern_index = coll[x][y][0];
-                        //Assign value using coordinates
-                        result[x][y] = patterns[pattern_index].values[pattern_x][pattern_y];
-
-                        //Save computations by finding offset right away
-                        //Since patterns are stored clockwise
-                        //But the output array is stored cartesi anally
-
-
-                        int offset_x = pattern_x + 1;
-                        if (offset_x >= pattern_size)
-                            offset_x = 0;
-                        int offset_y = pattern_y + 1;
-                        if (offset_y >= pattern_size)
-                            offset_y = 0;
-
-
-                        if (y % 2 == 0)
+                        for (int a = 0; a < pattern_size; a++)
                         {
-                            if (x % 2 == 0)
-                                result[x][y] = patterns[pattern_index].values[offset_x][pattern_y];
-                            else
-                                result[x][y] = patterns[pattern_index].values[pattern_x][pattern_y]; 
-                        } else
-                        {
-                            if (x % 2 != 0)
-                                result[x][y] = patterns[pattern_index].values[pattern_x][offset_y];
-                            else
-                                result[x][y] = patterns[pattern_index].values[offset_x][offset_y];
+                            //Check if cell of pattern is within bounds of resulting array
+                            if (x + a >= 0 && x + a < result_size && y + b >= 0 && y + b < result_size)
+                            {
+                                //This cell of this pattern has not been observed
+                                if (possible_solutions == null)
+                                    result[x+a][y+b] = -2;
+                                //This cell of this pattern has been observed but it is overlapping
+                                else if (possible_solutions.Count != 1)
+                                    result[x + a][y + b] = -1;
+                                //This cell of this pattern has been collapsed already
+                                else
+                                {
+                                    Pattern current_pattern = patterns[possible_solutions[0]];
+                                    //Assign value using coordinates
+                                    result[x + a][y + b] = current_pattern.values[a][b];
 
+                                    //Save computations by finding offset right away
+                                    //Since patterns are stored clockwise
+                                    //But the output array is stored cartesi anally
+
+
+                                    int offset_x = a + 1;
+                                    if (offset_x >= pattern_size)
+                                        offset_x = 0;
+                                    int offset_y = b + 1;
+                                    if (offset_y >= pattern_size)
+                                        offset_y = 0;
+
+
+                                    if (y % 2 == 0)
+                                    {
+                                        if (x % 2 == 0)
+                                            result[x][y] = current_pattern.values[offset_x][b];
+                                        else
+                                            result[x][y] = current_pattern.values[a][b];
+                                    }
+                                    else
+                                    {
+                                        if (x % 2 != 0)
+                                            result[x][y] = current_pattern.values[a][offset_y];
+                                        else
+                                            result[x][y] = current_pattern.values[offset_x][offset_y];
+
+                                    }
+
+                                }
+                            }
                         }
-                        //result[x][y] = pattern_index;
-
-                        //This pattern has been observed and has collapsed
-                        //FillArray(result, list_value[0], patterns, new Vector2(x, y));
-
                     }
-                    //Get the coordinates in the pattern boundaries
-                    pattern_x++;
-                    if (pattern_x >= pattern_size)
-                        pattern_x = 0;
-
                 }
-                pattern_y++;
-                if (pattern_y >= pattern_size)
-                    pattern_y = 0;
             }
             return result;
         }

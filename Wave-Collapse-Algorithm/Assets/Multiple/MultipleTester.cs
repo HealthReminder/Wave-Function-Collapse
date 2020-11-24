@@ -11,10 +11,9 @@ public class MultipleTester : MonoBehaviour
     //It is a list that composes the tileset
     public Transform tileset_transform;
     public Tile invalid_tile;
-    Tile[] tiles;
-    //Dataset size is the size of the side of the square 
-    //Or grid that represents the dataset
-    //This script only works on square matrix
+    //This array contains the tiles from a neighbor constraint standpoint
+    Tile[] unique_tileset;
+    //Dataset size is the size of the side of the grid that represents the dataset, only works on square matrix
     public Transform dataset_transform;
     Tile[] dataset;
     int[][] output_for_display;
@@ -23,7 +22,8 @@ public class MultipleTester : MonoBehaviour
     public int pattern_size = 3;
     public int output_size = 30;
     #region Active
-    int[][] input;
+    int[][] input_unique;
+    int[][] input_constrained;
     int[][] offset;
     int[][] pattern;
     List<Pattern> unique;
@@ -47,31 +47,31 @@ public class MultipleTester : MonoBehaviour
     IEnumerator Test()
     {
         //Get the tileset and dataset from the respective transforms
-        tiles = tileset_transform.GetComponentsInChildren<Tile>();
+        unique_tileset = tileset_transform.GetComponentsInChildren<Tile>();
         dataset = dataset_transform.GetComponentsInChildren<Tile>();
-        Debug.Log("<color=green> Got tileset of size: " + tiles.Length + ". Got dataset of size: " + dataset.Length + "\n</color> ");
-
-
-        input = InputReader.GetInput(dataset);
-        Debug.Log("<color=yellow> Generated input: \n</color> " + ReadArrayInt(input));
-        offset = WFCInputOutput.GetOffsetArray(input, pattern_size);
-        Debug.Log("<color=yellow> Offset grid output: \n</color> " + ReadArrayInt(offset));
+        Debug.Log("<color=grey> Got tileset of size: " + unique_tileset.Length + ". Got dataset of size: " + dataset.Length + "</color>\n ");
+        input_unique = InputReader.GetInput(dataset);
+        Debug.Log("<color=green> Generated input: </color>\n " + ReadArrayInt(input_unique));
+        input_constrained = InputReader.GetConstraints(dataset);
+        Debug.Log("<color=cyan> Generated constraints: </color>\n " + ReadArrayInt(input_constrained));
+        offset = WFCInputOutput.GetOffsetArray(input_constrained, pattern_size);
+        Debug.Log("<color=yellow> Offset grid output: </color>\n " + ReadArrayInt(offset));
 
 
         var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
         pattern = pattern_info.pattern_array;
-        Debug.Log("<color=orange> Pattern grid output: \n</color> " + ReadArrayInt(pattern));
+        Debug.Log("<color=orange> Pattern grid output: </color>\n " + ReadArrayInt(pattern));
         unique = pattern_info.pattern_list;
 
         string log = "";
         for (int i = 0; i < unique.Count; i++)
             log += unique[i].GetValues() + "\n";
-        Debug.Log("<color=orange> Unique patterns: \n</color> " + log);
+        Debug.Log("<color=orange> Unique patterns: </color> \n" + log);
 
         log = "";
         for (int i = 0; i < unique.Count; i++)
             log += unique[i].GetFrequency() + "\n";
-        Debug.Log("<color=red> Frequency of unique patterns: \n</color> " + log);
+        Debug.Log("<color=red> Frequency of unique patterns:</color> \n " + log);
 
         //log = "";
         //for (int i = 0; i < unique.Count; i++)
@@ -87,7 +87,7 @@ public class MultipleTester : MonoBehaviour
         //Optional parameters to include a preset first cell
         yield return CollapseArray(output_size, unique, 1);
 
-        StartCoroutine(InstantiateOutput(output, tiles, invalid_tile));
+        StartCoroutine(InstantiateOutput(output, unique_tileset, invalid_tile));
 
         Debug.Log("Finished test routine.");
         yield break;
@@ -161,7 +161,7 @@ public class MultipleTester : MonoBehaviour
         Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
 
 
-        Debug.Log("<color=yellow> " + "Interpreted input array" + " collapse: </color> \n" + ReadArrayChar(InterpretOutput(input)));
+        Debug.Log("<color=yellow> " + "Interpreted input array" + " collapse: </color> \n" + ReadArrayChar(InterpretOutput(input_constrained)));
 
         //READ OUTPUT
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);

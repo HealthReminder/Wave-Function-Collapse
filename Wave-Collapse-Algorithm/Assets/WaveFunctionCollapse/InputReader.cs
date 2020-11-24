@@ -10,8 +10,13 @@ namespace WaveFunctionCollapse
     public static class InputReader 
     {
     
-        public static int[][] GetInput(Tile[] dataset)
+        public static int[] GetConstraintTileset()
         {
+            return null;
+        }
+        public static int[][] GetConstraints(Tile[] dataset)
+        {
+            //This function reads the dataset array and outputs an organized map of the tileset grid that can be iterated through
             int total = dataset.Length;
             float sqr = Mathf.Sqrt(total);
             if (!Mathf.Approximately(sqr, (int)sqr))
@@ -49,7 +54,7 @@ namespace WaveFunctionCollapse
             }
             if (ordered.Count < total)
                 Debug.LogError("Missed tile in ordering routine.");
-           
+
             //Label tilest
             for (int i = 0; i < total; i++)
             {
@@ -73,7 +78,76 @@ namespace WaveFunctionCollapse
                         Debug.LogWarning("Did not find object in tileset. Defaulting to -1.");
                 }
             }
-            
+
+
+            Debug.Log(ReadArrayInt(output));
+            return (output);
+        }
+        public static int[][] GetInput(Tile[] dataset)
+        {
+            //This function reads the dataset array and outputs an organized map of the tileset grid that can be iterated through
+            int total = dataset.Length;
+            float sqr = Mathf.Sqrt(total);
+            if (!Mathf.Approximately(sqr, (int)sqr))
+            {
+                Debug.LogError("Input dataset has invalid length. Grid must be a square matrix.");
+                return null;
+            }
+            int side = (int)sqr;
+
+            //Cache output and reset it
+            int[][] output = SetupOutput(side);
+
+            //Order received input by position
+            List<Tile> unordered = new List<Tile>();
+            for (int i = 0; i < total; i++)
+                unordered.Add(dataset[i]);
+
+            //Sort by distance
+            List<Vector3> positions = new List<Vector3>();
+            for (int i = 0; i < total; i++)
+                positions.Add(dataset[i].transform.position);
+            positions.Sort(CompareVector3);
+
+            //Populate tiles again
+            List<Tile> ordered = new List<Tile>();
+            for (int i = 0; i < positions.Count; i++)
+            {
+                int matching_index = 0;
+                for (int o = 0; o < unordered.Count; o++)
+                {
+                    if (unordered[o].transform.position == positions[i])
+                        matching_index = o;
+                }
+                ordered.Add(unordered[matching_index]);
+            }
+            if (ordered.Count < total)
+                Debug.LogError("Missed tile in ordering routine.");
+
+            //Label tilest
+            for (int i = 0; i < total; i++)
+            {
+
+                ordered[i].gameObject.name = ((int)ordered[i].transform.position.x).ToString() + "/" + ((int)ordered[i].transform.position.z).ToString();
+                //Move dataset for debug purposes
+                //ordered[i].transform.position += new Vector3(0, i*0.1f, 0);
+            }
+
+            //Populate output array
+            for (int y = 0; y < side; y++)
+            {
+                for (int x = 0; x < side; x++)
+                {
+                    //Find the index in the tileset
+                    int r = -1;
+                    //Goes by each x and add the row using the side -1 to keep it in boundaries
+                    r = ordered[x + y * (side - 1) + y].type;
+                    output[x][y] = r;
+                    if (r == -1)
+                        Debug.LogWarning("Did not find object in tileset. Defaulting to -1.");
+                }
+            }
+
 
             Debug.Log(ReadArrayInt(output));
             return (output);
