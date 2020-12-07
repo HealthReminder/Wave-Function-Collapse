@@ -50,12 +50,12 @@ public class MultipleTester : MonoBehaviour
         unique_tileset = tileset_transform.GetComponentsInChildren<Tile>();
         dataset = dataset_transform.GetComponentsInChildren<Tile>();
         Debug.Log("<color=grey> Got tileset of size: " + unique_tileset.Length + ". Got dataset of size: " + dataset.Length + "</color>\n ");
-        input_unique = InputReader.GetInput(dataset);
-        Debug.Log("<color=green> Generated input: </color>\n " + ReadArrayInt(input_unique));
-        input_constrained = InputReader.GetConstraints(dataset);
-        Debug.Log("<color=cyan> Generated constraints: </color>\n " + ReadArrayInt(input_constrained));
+        //input_unique = InputReader.GetInput(dataset);
+        //Debug.Log("<color=green> Generated input: </color>\n " + ReadArrayInt(input_unique));
+        input_constrained = InputReader.GetConstraintArray(dataset);
+        Debug.Log("<color=green> Input grid: </color>\n " + ReadArrayInt(input_constrained));
         offset = WFCInputOutput.GetOffsetArray(input_constrained, pattern_size);
-        Debug.Log("<color=yellow> Offset grid output: </color>\n " + ReadArrayInt(offset));
+        Debug.Log("<color=green> Offset grid: </color>\n " + ReadArrayInt(offset));
 
 
         var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
@@ -140,7 +140,9 @@ public class MultipleTester : MonoBehaviour
 
         #region WFC Algorithm
         //FOR DEBUG ONLY
-        initial_pattern = 1;
+        initial_pattern = Random.Range(0,all_patterns.Count);
+        Debug.LogWarning("Fixed initial pattern collapse of index 0");
+        initial_pattern = 0;
         Vector2 initial_collapse;
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
         if (initial_pattern != -1)

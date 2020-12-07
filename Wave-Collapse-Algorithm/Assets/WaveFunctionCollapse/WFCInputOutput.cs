@@ -15,7 +15,8 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Padding should not be a negative number.");
             else if (input[0] == null)
                 Debug.LogError("Cannot get offset array for invalid input array");
-
+            if (padding > input.Length)
+                Debug.LogWarning("Offset padding should not be bigger than dataset size. It means that the pattern size is actually bigger than the dataset.");
             //Get input and output side sizes
             int input_x, input_y, output_x, output_y;
             input_x = input.Length;
@@ -76,6 +77,24 @@ namespace WaveFunctionCollapse
                     //Divide it by pattern size to cached the respective pattern
                     List<int> possible_solutions = coll[x / pattern_size][y / pattern_size];
 
+                    /*This code seemed to have worked for 2x2 pattern size but wtf
+                    int off_x = 0;
+                    int off_y = 0;
+                    //Third pattern (bot-right)
+                    if (y / pattern_size % 2 != 0 && x / pattern_size % 2 != 0)
+                        off_y = 1;
+                    //First pattern (top-left)
+                    else if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
+                        off_x = 1;
+                    //Fourth pattern (bot-left)
+                    if (y / pattern_size % 2 != 0 && x / pattern_size % 2 == 0)
+                    {
+                        off_x = 1;
+                        off_y = 1;
+                    }
+                    */
+
+
                     //for each cell of the pattern fill it with the appropriate value
                     for (int b = 0; b < pattern_size; b++)
                     {
@@ -94,39 +113,33 @@ namespace WaveFunctionCollapse
                                 else
                                 {
                                     Pattern current_pattern = patterns[possible_solutions[0]];
-                                    //Assign value using coordinates
-                                    result[x + a][y + b] = current_pattern.values[a][b];
 
-                                    //Save computations by finding offset right away
-                                    //Since patterns are stored clockwise
-                                    //But the output array is stored cartesi anally
-
-
-                                    int offset_x = a + 1;
-                                    if (offset_x >= pattern_size)
-                                        offset_x = 0;
-                                    int offset_y = b + 1;
-                                    if (offset_y >= pattern_size)
-                                        offset_y = 0;
+                                    //For SOME REASON? The rotation of the pattern change when creating the output
+                                    //Therefore we have to rotate. This rotation was calculated manually
+                                    
+                                   
 
 
-                                    if (y % 2 == 0)
-                                    {
-                                        if (x % 2 == 0)
-                                            result[x][y] = current_pattern.values[offset_x][b];
-                                        else
-                                            result[x][y] = current_pattern.values[a][b];
-                                    }
-                                    else
-                                    {
-                                        if (x % 2 != 0)
-                                            result[x][y] = current_pattern.values[a][offset_y];
-                                        else
-                                            result[x][y] = current_pattern.values[offset_x][offset_y];
+                                        result[x + a][y + b] = current_pattern.values[a][b];
+                                    //int off_a = a + off_x;
+                                    int off_a = a;
+                                    while (off_a >= pattern_size)
+                                        off_a -= pattern_size;
 
-                                    }
+                                    //int off_b = b + off_y;
+                                    int off_b = b;
+                                    while (off_b >= pattern_size)
+                                        off_b -= pattern_size;
 
+                                    result[x + a][y + b] = possible_solutions[0];
+
+                                    //This codes lets you figure out the location of the pattern (topleft top right bot right bot left)
+                                    //if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
+                                    //result[x + a][y + b] = 0;
+
+                                    //result[x + a][y + b] = y/pattern_size;
                                 }
+
                             }
                         }
                     }

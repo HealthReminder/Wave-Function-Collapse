@@ -183,10 +183,10 @@ namespace WaveFunctionCollapse
                 {
                     //Get the pattern from list
                     int index = arr[x][y];
+                    
                     if (index != -1)
                     {
                         Pattern current_pattern = pat_list[arr[x][y]];
-
                         //Check if neighbor is valid
                         if (y - 1 >= 0)
                             if (arr[x][y - 1] != -1)
@@ -206,10 +206,13 @@ namespace WaveFunctionCollapse
                                 if (!current_pattern.possible_neighbors[3].Contains(arr[x - 1][y]))
                                     current_pattern.possible_neighbors[3].Add(arr[x - 1][y]);
 
-                        int sum = 0;
+                        string[] debug_n = new string[4];
                         for (int i = 0; i < 4; i++)
-                            sum += current_pattern.possible_neighbors[i].Count;
-                        //Debug.Log("Getting neighbors for pattern " + arr[x][y] +" = "+sum);
+                            if (current_pattern.possible_neighbors != null)
+                                if (current_pattern.possible_neighbors[i] != null)
+                                for (int o = 0; o < current_pattern.possible_neighbors[i].Count; o++)
+                                        debug_n[i] += current_pattern.possible_neighbors[i][o];
+                        Debug.Log(string.Format("Neighbors of index {0} \n North: {1}\n East: {2}\n South: {3}\n West: {4} ",index, debug_n[0], debug_n[1], debug_n[2], debug_n[3]));
                     }
                 }
             }
