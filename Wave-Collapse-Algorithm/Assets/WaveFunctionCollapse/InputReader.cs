@@ -96,7 +96,7 @@ namespace WaveFunctionCollapse
             }
             return v1.z > v2.z ? -1 : 1;
         }
-        static int[][] SetupOutput(int size)
+        private static int[][] SetupOutput(int size)
         {
             //Cache output and reset it
             int[][] r = new int[size][];
