@@ -3,10 +3,10 @@ using System.Linq;
 using UnityEngine;
 using WaveFunctionCollapse;
 
-public class UnitTestsInput : MonoBehaviour
+public class UnitTestsInput : UnitTestsBase
 {
     //Delayed testing
-    float order = 0;
+    public float order = 0;
     //Show individual unit results
     bool display_internal_results = true;
     void Start()
@@ -36,7 +36,7 @@ public class UnitTestsInput : MonoBehaviour
         //Print the result if required
         if (display_internal) Debug.Log("<color=blue> GetConstraintArray_ProperIdentification_VerticalSlice: " + unit_result + "</color>");
         //Check if routine has failed
-        result_constraint = (unit_result) ? result_constraint:false);
+        result_constraint = (unit_result) ? result_constraint:false;
 
 
         if (result_constraint)
@@ -69,29 +69,6 @@ public class UnitTestsInput : MonoBehaviour
         int[] output_linear = SquareArrayToLinear(output_square);
         result = CompareLinearArrays(output_linear, output_expected);
         return result;
-    }
-    bool CompareLinearArrays(int[] output, int[] expected)
-    {
-        //Returns true if arrays are equal to each other
-        if (output.Length != expected.Length)
-            return false;
-        else
-        {
-            int length = output.Length;
-            for (int i = 0; i < length; i++)
-                if (output[i] != expected[i])
-                    return false;
-        }
-        return true;
-    }
-    int[] SquareArrayToLinear(int[][] input)
-    {
-        int side_length = input.Length;
-        int[] output = new int[side_length * side_length];
-        for (int y = 0; y < side_length; y++)
-            for (int x = 0; x < side_length; x++)
-                output[x + y * side_length] = input[y][x];
-        return output;
     }
     Tile[] IntArrayToTileArray(int[] input_array)
     {

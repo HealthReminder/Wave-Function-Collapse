@@ -15,37 +15,44 @@ namespace WaveFunctionCollapse
                 Debug.LogError("Padding should not be a negative number.");
             else if (input[0] == null)
                 Debug.LogError("Cannot get offset array for invalid input array");
+
+            int extra_padding = 0;
+            //This is an edge case
             if (padding > input.Length)
-                Debug.LogWarning("Offset padding should not be bigger than dataset size. It means that the pattern size is actually bigger than the dataset.");
+            {
+                Debug.LogWarning("Ideally offset padding should not be bigger than dataset size. It means that the pattern size is actually bigger than the dataset.");
+                extra_padding = padding - input.Length;
+            }
+
             //Get input and output side sizes
-            int input_x, input_y, output_x, output_y;
-            input_x = input.Length;
-            input_y = input[0].Length;
-            output_x = input_x + padding * 1;
-            output_y = input_y + padding * 1;
-            int[][] result = new int[output_x][];
+            int input_y, input_x, output_y, output_x;
+            input_y = input.Length;
+            input_x = input[0].Length;
+            output_y = input_y + padding - 1 + extra_padding;
+            output_x = input_x + padding - 1 + extra_padding;
+            int[][] result = new int[output_y][];
 
             //Fill each cell of the output array
-            for (int x = 0; x < output_x; x++)
+            for (int y = 0; y < output_y; y++)
             {
-                result[x] = new int[output_x];
-                for (int y = 0; y < output_y; y++)
+                result[y] = new int[output_y];
+                for (int x = 0; x < output_x; x++)
                 {
                     //For cells which fit in the input array just copy the number
-                    if (y < input_y && x < input_x)
-                        result[x][y] = input[x][y];
+                    if (x < input_x && y < input_y)
+                        result[y][x] = input[y][x];
                     //For cells outside the bounds get the right coordinates
                     else
                     {
-                        int new_x = x;
-                        while (new_x >= input_x)
-                            new_x -= input_x;
                         int new_y = y;
                         while (new_y >= input_y)
                             new_y -= input_y;
+                        int new_x = x;
+                        while (new_x >= input_x)
+                            new_x -= input_x;
                         //Log the new x and y positions that are now inside the input array Debug.Log(new_x + " " + new_y);
                         // Debug.Log(input_array[new_x][new_y]);
-                        result[x][y] = input[new_x][new_y];
+                        result[y][x] = input[new_y][new_x];
                     }
                 }
             }
