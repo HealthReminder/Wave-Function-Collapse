@@ -20,7 +20,7 @@ namespace WaveFunctionCollapse
             //This is an edge case
             if (padding > input.Length)
             {
-                Debug.LogWarning("Ideally offset padding should not be bigger than dataset size. It means that the pattern size is actually bigger than the dataset.");
+                //Debug.LogWarning("Ideally offset padding should not be bigger than dataset size. It means that the pattern size is actually bigger than the dataset.");
                 extra_padding = padding - input.Length;
             }
 
