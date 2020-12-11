@@ -65,13 +65,179 @@ namespace WaveFunctionCollapse
     }
     public static class WFCPattern
     {
+        /*
+        public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternArray(int[][] offset, int pattern_size)
+        {
+            //The pattern array starts off with the size and values of the offset array
+            int size_y = offset.Length;
+            int size_x = offset[0].Length;
+            int[][] pattern_array = new int[size_y][];
+            for (int y = 0; y < size_y; y++)
+                pattern_array[y] = new int[size_y];
+
+            for (int y = 0; y < size_y; y++)
+                for (int x = 0; x < size_x; x++)
+                    pattern_array[y][x] = offset[y][x];
+
+            //This array will contain the pattern cell values
+            int[][] current_pattern = new int[pattern_size][];
+            for (int i = 0; i < pattern_size; i++)
+                current_pattern[i] = new int[pattern_size];
+
+
+            for (int y = 0; y < size_x; y++)
+            {
+                for (int x = 0; x < size_y; x++)
+                {
+                    bool is_out_of_bounds = false;
+                    //Get the next pattern if not out of bounds
+                    if (x + pattern_size - 1 < size_y && y + pattern_size - 1 < size_x)
+                    {
+                        for (int b = 0; b < pattern_size; b++)
+                        {
+                            for (int a = 0; a < pattern_size; a++)
+                            {
+                                //For some reason b must be in place of a
+                                //Otherwise pattern identification invert axis
+                                current_pattern[a][b] = pattern_array[x + a][y + b];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        is_out_of_bounds = true;
+                    }
+                    // && x%pattern_size == 0 && y%pattern_size == 0
+                    if (!is_out_of_bounds)
+                    {
+                        //Compare it to other patterns in the unique pattern list
+                        int unique_id = pattern_list.Count;
+                        for (int i = 0; i < pattern_list.Count; i++)
+                            if (CompareArrays(pattern_list[i].values, current_pattern))
+                            {
+                                //Debug.Log(current_pattern[0][0] + "|" + current_pattern[1][0]);
+                                pattern_list[i].frequency++;
+                                unique_id = i;
+                                i = pattern_list.Count;
+                            }
+
+                        //If this condition is true it means that the current pattern
+                        //Is unique and must add it to the unique pattern list
+                        if (unique_id == pattern_list.Count)
+                        {
+                            //Instantiate new pattern
+                            Pattern new_pattern = new Pattern();
+                            new_pattern.values = new int[pattern_size][];
+                            for (int i = 0; i < pattern_size; i++)
+                                new_pattern.values[i] = new int[pattern_size];
+
+                            for (int o = 0; o < pattern_size; o++)
+                                for (int i = 0; i < pattern_size; i++)
+                                    new_pattern.values[i][o] = current_pattern[i][o];
+                            //Create an instance in pattern list and set frequency
+                            new_pattern.frequency = 1;
+                            pattern_list.Add(new_pattern);
+                        }
+                        //Finally modify the pattern array to contain the indexes of the patterns
+                        pattern_array[x][y] = unique_id;
+                    }
+                    else
+                    {
+                        pattern_array[x][y] = -1;
+                    }
+                }
+            }
+            //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
+            GetNeighbors(pattern_array, pattern_size, pattern_list);
+            return (pattern_array, pattern_list);
+        }
+        */
+
+        public static List<Pattern> GetUniquePatterns(int[][] offset, int pattern_size)
+        {
+            //Get sizes
+            int size_x = offset[0].Length;
+            int size_y = offset.Length;
+
+            //This array is used to store the unique pattern indexes
+            List<Pattern> pattern_list = new List<Pattern>();
+
+            //This array will hold the values of each pattern analyzed
+            int[][] current_pattern = new int[pattern_size][];
+            for (int i = 0; i < pattern_size; i++)
+                current_pattern[i] = new int[pattern_size];
+
+            for (int y = 0; y < size_y; y++)
+            {
+                for (int x = 0; x < size_x; x++)
+                {
+                    bool is_out_of_bounds = false;
+                    //Get the next pattern if not out of bounds
+                    if (x + pattern_size - 1 < size_x && y + pattern_size - 1 < size_y)
+                    {
+                        for (int b = 0; b < pattern_size; b++)
+                        {
+                            for (int a = 0; a < pattern_size; a++)
+                            {
+                                //For some reason b must be in place of a
+                                //Otherwise pattern identification invert axis
+                                current_pattern[b][a] = offset[y + b][x + a];
+                            }
+                        }
+                    }
+                    else
+                        is_out_of_bounds = true;
+                    
+                    if (!is_out_of_bounds)
+                    {
+                        //Compare it to other patterns in the unique pattern list
+                        int unique_id = pattern_list.Count;
+                        for (int i = 0; i < pattern_list.Count; i++)
+                            if (CompareArrays(pattern_list[i].values, current_pattern))
+                            {
+                                //Debug.Log(current_pattern[0][0] + "|" + current_pattern[1][0]);
+                                pattern_list[i].frequency++;
+                                unique_id = i;
+                                i = pattern_list.Count;
+                            }
+
+                        //If this condition is true it means that the current pattern
+                        //Is unique and must add it to the unique pattern list
+                        if (unique_id == pattern_list.Count)
+                        {
+                            //Instantiate new pattern
+                            Pattern new_pattern = new Pattern();
+
+                            //Fill pattern cells
+                            new_pattern.values = new int[pattern_size][];
+                            for (int i = 0; i < pattern_size; i++)
+                                new_pattern.values[i] = new int[pattern_size];
+
+                            for (int o = 0; o < pattern_size; o++)
+                                for (int i = 0; i < pattern_size; i++)
+                                    new_pattern.values[i][o] = current_pattern[i][o];
+
+                            //Create an instance in pattern list and set frequency
+                            new_pattern.frequency = 1;
+                            pattern_list.Add(new_pattern);
+                        }
+                    }
+                }
+            }
+            //for (int i = 0; i < pattern_list.Count; i++)
+                //for (int o = 0; o < pattern_list[i].values.Length; o++)
+                    //for (int k = 0; k < pattern_list[i].values[o].Length; k++)
+                        //Debug.Log(pattern_list[i].values[o][k]);
+
+            return (pattern_list);
+        }
 
         public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternInformation(int[][] offset, int pattern_size)
         {
             //Get sizes and setup result array
             int size_x = offset.Length;
             int size_y = offset[0].Length;
-           int[][] pattern_array = new int[size_x][];
+            int[][] pattern_array = new int[size_x][];
             for (int x = 0; x < size_x; x++)
                 pattern_array[x] = new int[size_x];
 

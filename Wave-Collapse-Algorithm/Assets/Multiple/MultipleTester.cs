@@ -54,9 +54,9 @@ public class MultipleTester : MonoBehaviour
         //Debug.Log("<color=green> Generated input: </color>\n " + ReadArrayInt(input_unique));
         input_constrained = InputReader.GetConstraintArray(dataset);
         Debug.Log("<color=green> Input grid: </color>\n " + ReadArrayInt(input_constrained));
+
         offset = WFCInputOutput.GetOffsetArray(input_constrained, pattern_size);
         Debug.Log("<color=green> Offset grid: </color>\n " + ReadArrayInt(offset));
-
 
         var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
         pattern = pattern_info.pattern_array;
