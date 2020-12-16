@@ -232,6 +232,63 @@ namespace WaveFunctionCollapse
             return (pattern_list);
         }
 
+        public static int[][] GetPatternArray(int[][] offset, int pattern_size, List<Pattern> unique_patterns)
+        {
+            //Get sizes and setup result array
+            int size_x = offset.Length;
+            int size_y = offset[0].Length;
+            int[][] pattern_array = new int[size_x][];
+            for (int x = 0; x < size_x; x++)
+                pattern_array[x] = new int[size_x];
+
+            for (int y = 0; y < size_y; y++)
+                for (int x = 0; x < size_x; x++)
+                    pattern_array[x][y] = offset[x][y];
+
+            //This array will contain the indexes of the patterns each cell belongs to
+            int[][] current_pattern = new int[pattern_size][];
+            for (int i = 0; i < pattern_size; i++)
+                current_pattern[i] = new int[pattern_size];
+
+            for (int y = 0; y < size_y; y++)
+            {
+                for (int x = 0; x < size_x; x++)
+                {
+                    bool is_out_of_bounds = false;
+                    //Get the next pattern if not out of bounds
+                    if (x + pattern_size - 1 < size_x && y + pattern_size - 1 < size_y)
+                    {
+                        for (int b = 0; b < pattern_size; b++)
+                        {
+                            for (int a = 0; a < pattern_size; a++)
+                            {
+                                current_pattern[b][a] = pattern_array[y + b][x + a];
+                            }
+                        }
+                    }
+                    else
+                        is_out_of_bounds = true;
+                    
+                    if (!is_out_of_bounds)
+                    {
+                        //Compare it to other patterns in the unique pattern list
+                        for (int i = 0; i < unique_patterns.Count; i++)
+                            if (CompareArrays(unique_patterns[i].values, current_pattern))
+                            {
+                                pattern_array[y][x] = i;
+                            }                       
+                    }
+                    else
+                    {
+                        pattern_array[y][x] = -1;
+                    }
+                }
+            }
+            //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
+            //GetNeighbors(pattern_array, pattern_size, unique_patterns);
+            return (pattern_array);
+        }
+
         public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternInformation(int[][] offset, int pattern_size)
         {
             //Get sizes and setup result array

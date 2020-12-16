@@ -58,10 +58,10 @@ public class MultipleTester : MonoBehaviour
         offset = WFCInputOutput.GetOffsetArray(input_constrained, pattern_size);
         Debug.Log("<color=green> Offset grid: </color>\n " + ReadArrayInt(offset));
 
-        var pattern_info = WFCPattern.GetPatternInformation(offset, pattern_size);
-        pattern = pattern_info.pattern_array;
+        unique = WFCPattern.GetUniquePatterns(offset,pattern_size);
         Debug.Log("<color=orange> Pattern grid output: </color>\n " + ReadArrayInt(pattern));
-        unique = pattern_info.pattern_list;
+        pattern = WFCPattern.GetPatternArray(offset,pattern_size,unique);
+        Debug.LogWarning("There is no get neighbors yet!");
 
         string log = "";
         for (int i = 0; i < unique.Count; i++)
