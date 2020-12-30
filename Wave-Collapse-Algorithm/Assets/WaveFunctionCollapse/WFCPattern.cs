@@ -400,34 +400,35 @@ namespace WaveFunctionCollapse
 
             //Go through the pattern array 
             int l = arr.Length;
-            for (int y = 0; y < l; y ++)
+
+            for (int y = 0; y < l; y++)
             {
-                for (int x = 0; x < l; x ++)
+                for (int x = 0; x < l; x++)
                 {
                     //Get the pattern from list
-                    int index = arr[x][y];
+                    int index = arr[y][x];
                     
                     if (index != -1)
                     {
-                        Pattern current_pattern = pat_list[arr[x][y]];
+                        Pattern current_pattern = pat_list[arr[y][x]];
                         //Check if neighbor is valid
                         if (y - 1 >= 0)
-                            if (arr[x][y - 1] != -1)
+                            if (arr[y - 1][x] != -1)
                                 //If this is not a neighbor already, add it
-                                if (!current_pattern.possible_neighbors[0].Contains(arr[x][y - 1]))
-                                    current_pattern.possible_neighbors[0].Add(arr[x][y - 1]);
+                                if (!current_pattern.possible_neighbors[0].Contains(arr[y - 1][x]))
+                                    current_pattern.possible_neighbors[0].Add(arr[y - 1][x]);
                         if (x + 1 < l)
-                            if (arr[x + 1][y] != -1)
-                                if (!current_pattern.possible_neighbors[1].Contains(arr[x + 1][y]))
-                                    current_pattern.possible_neighbors[1].Add(arr[x + 1][y]);
+                            if (arr[y][x + 1] != -1)
+                                if (!current_pattern.possible_neighbors[1].Contains(arr[y][x + 1]))
+                                    current_pattern.possible_neighbors[1].Add(arr[y][x + 1]);
                         if (y + 1 < l)
-                            if (arr[x][y + 1] != -1)
-                                if (!current_pattern.possible_neighbors[2].Contains(arr[x][y + 1]))
-                                    current_pattern.possible_neighbors[2].Add(arr[x][y + 1]);
+                            if (arr[y + 1][x] != -1)
+                                if (!current_pattern.possible_neighbors[2].Contains(arr[y + 1][x]))
+                                    current_pattern.possible_neighbors[2].Add(arr[y + 1][x]);
                         if (x - 1 >= 0)
-                            if (arr[x - 1][y] != -1)
-                                if (!current_pattern.possible_neighbors[3].Contains(arr[x - 1][y]))
-                                    current_pattern.possible_neighbors[3].Add(arr[x - 1][y]);
+                            if (arr[y][x - 1] != -1)
+                                if (!current_pattern.possible_neighbors[3].Contains(arr[y][x - 1]))
+                                    current_pattern.possible_neighbors[3].Add(arr[y][x - 1]);
 
                         string[] debug_n = new string[4];
                         for (int i = 0; i < 4; i++)
