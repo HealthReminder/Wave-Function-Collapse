@@ -82,7 +82,7 @@ namespace WaveFunctionCollapse
                 {
                     //X and Y represents the "pivot" of the current pattern being transcribed
                     //Divide it by pattern size to cached the respective pattern
-                    List<int> possible_solutions = coll[x / pattern_size][y / pattern_size];
+                    List<int> possible_solutions = coll[y / pattern_size][x / pattern_size];
 
                     /*This code seemed to have worked for 2x2 pattern size but wtf
                     int off_x = 0;
@@ -112,10 +112,10 @@ namespace WaveFunctionCollapse
                             {
                                 //This cell of this pattern has not been observed
                                 if (possible_solutions == null)
-                                    result[x+a][y+b] = -2;
+                                    result[y + b][x + a] = -2;
                                 //This cell of this pattern has been observed but it is overlapping
                                 else if (possible_solutions.Count != 1)
-                                    result[x + a][y + b] = -1;
+                                    result[y + b][x + a] = -1;
                                 //This cell of this pattern has been collapsed already
                                 else
                                 {
@@ -123,11 +123,8 @@ namespace WaveFunctionCollapse
 
                                     //For SOME REASON? The rotation of the pattern change when creating the output
                                     //Therefore we have to rotate. This rotation was calculated manually
-                                    
-                                   
 
-
-                                        result[x + a][y + b] = current_pattern.values[a][b];
+                                    result[y + b][x + a] = current_pattern.values[b][a];
                                     //int off_a = a + off_x;
                                     int off_a = a;
                                     while (off_a >= pattern_size)
@@ -138,7 +135,7 @@ namespace WaveFunctionCollapse
                                     while (off_b >= pattern_size)
                                         off_b -= pattern_size;
 
-                                    result[x + a][y + b] = possible_solutions[0];
+                                    result[y + b][x + a] = possible_solutions[0];
 
                                     //This codes lets you figure out the location of the pattern (topleft top right bot right bot left)
                                     //if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)

@@ -289,7 +289,7 @@ namespace WaveFunctionCollapse
             return (pattern_array);
         }
 
-        public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternInformation(int[][] offset, int pattern_size)
+        /*public static (int[][] pattern_array, List<Pattern> pattern_list) GetPatternInformation(int[][] offset, int pattern_size)
         {
             //Get sizes and setup result array
             int size_x = offset.Length;
@@ -375,8 +375,8 @@ namespace WaveFunctionCollapse
             //Debug.Log("Generated offset array with " + unique_patterns.Count + " unique patterns.");
             GetNeighbors(pattern_array, pattern_size, pattern_list);
             return (pattern_array, pattern_list);
-        }
-        static void GetNeighbors(int[][] arr, int pat_size, List<Pattern> pat_list)
+        }*/
+        public static List<Pattern> GetNeighbors(int[][] arr, int pat_size, List<Pattern> pat_list)
         {
             //This function assume that the unique patterns were already cached in the pattern list
             int pattern_size = pat_list[0].values.Length;
@@ -435,11 +435,11 @@ namespace WaveFunctionCollapse
                                 if (current_pattern.possible_neighbors[i] != null)
                                 for (int o = 0; o < current_pattern.possible_neighbors[i].Count; o++)
                                         debug_n[i] += current_pattern.possible_neighbors[i][o];
-                        Debug.Log(string.Format("Neighbors of index {0} \n North: {1}\n East: {2}\n South: {3}\n West: {4} ",index, debug_n[0], debug_n[1], debug_n[2], debug_n[3]));
+                        //Debug.Log(string.Format("Neighbors of index {0} \n North: {1}\n East: {2}\n South: {3}\n West: {4} ",index, debug_n[0], debug_n[1], debug_n[2], debug_n[3]));
                     }
                 }
             }
-
+            return pat_list;
         }
         static bool CompareArrays(int[][] a, int[][] b)
         {

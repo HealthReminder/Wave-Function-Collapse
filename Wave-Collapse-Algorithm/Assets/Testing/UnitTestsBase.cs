@@ -6,7 +6,7 @@ using WaveFunctionCollapse;
 public class UnitTestsBase : MonoBehaviour
 {
     #region Pattern
-    public int[][] PatternListToArray (List<Pattern> list)
+    public int[][] PatternListToArray(List<Pattern> list)
     {
         int pattern_count = list.Count;
         int[][] output = new int[pattern_count][];
@@ -15,9 +15,18 @@ public class UnitTestsBase : MonoBehaviour
 
         return output;
     }
+    public int[][] ListIntToArray(List<int>[] list)
+    {
+        int value_count = list.Length;
+        int[][] output = new int[value_count][];
+        for (int i = 0; i < value_count; i++)
+            output[i] =  list[i].ToArray();
+
+        return output;
+    }
     #endregion
 
-    #region Array Calculations
+    #region Array Transformation
     public int[][] LinearArrayToSquare(int[] input, int side_length)
     {
         if (side_length * side_length != input.Length)
@@ -43,6 +52,27 @@ public class UnitTestsBase : MonoBehaviour
                 output[x + y * side_length] = input[y][x];
         return output;
     }
+    #endregion
+    #region Array Calculations
+    public bool CompareArrays(int[][] output, int[][] expected)
+    {
+        //Returns true if arrays are equal to each other
+        int size_y = expected.Length;
+        int size_x = expected[0].Length;
+
+        if (output.Length != size_y)
+            return false;
+
+        if (output[0].Length != size_x)
+            return false;
+
+        for (int y = 0; y < size_y; y++)
+            for (int x = 0; x < size_x; x++)
+                if (output[y][x] != expected[y][x])
+                    return false;
+
+        return true;
+    }
     public bool CompareSquareArrays(int[][] output, int[][] expected)
     {
         //Returns true if arrays are equal to each other
@@ -57,7 +87,7 @@ public class UnitTestsBase : MonoBehaviour
 
         for (int y = 0; y < size_y; y++)
             for (int x = 0; x < size_x; x++)
-                if (output[x][y] != expected[x][y])
+                if (output[y][x] != expected[y][x])
                     return false;
 
         return true;

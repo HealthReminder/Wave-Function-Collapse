@@ -24,14 +24,14 @@ public class UnitTestsPattern : UnitTestsBase
         bool result_module = true;
         bool result_unit = true;
 
-        ///////////////////////////////////////////////////////////////////////////////// PATTERN SIZE TESTS
+        ///////////////////////////////////////////////////////////////////////////////// PATTERN LIST TESTS
 
         result_module = GetPatternList_PatternSizeTwo_AllFourMatch(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
         Debug.LogWarning("May be innacurate.");
 
-        ////////////////////////////////////////////////////////////////////////////// ARRAY TRANSCRIPTION TESTS
+        ////////////////////////////////////////////////////////////////////////////// PATTERN ARRAY TESTS
 
         result_module = GetPatternArray_ComplexOffsetPatternSizeTwo_PatternIdentificationMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
@@ -42,6 +42,10 @@ public class UnitTestsPattern : UnitTestsBase
         result_module = GetPatternArray_ChessPatternOffsetPatternSizeTwo_PatternIdentificationMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
+        ////////////////////////////////////////////////////////////////////////////////// NEIGHBOR TESTS
+
+        result_module = GetNeighbors_ChessPatternPatternSizeTwo_FirstLastMatches(display_internal);
+        result_unit = (result_module) ? result_unit : false;
 
 
         if (result_unit)
@@ -52,6 +56,69 @@ public class UnitTestsPattern : UnitTestsBase
 
         yield break;
     }
+    #region Neighboring
+    bool GetNeighbors_ChessPatternPatternSizeTwo_FirstLastMatches(bool debug)
+    {
+        ////////////////////////////////////////////////////      INPUT
+        int pattern_size = 2;
+        //This is the offset array to get unique pattern list
+        int[] input_offset_linear = new int[]
+        {
+            0,1,0,1,
+            1,0,1,0,
+            0,1,0,1,
+            1,0,1,0,
+        };
+        int[][] offset_array = LinearArrayToSquare(input_offset_linear, (int)Mathf.Sqrt(input_offset_linear.Length));
+        List<Pattern> pattern_list = WFCPattern.GetUniquePatterns(offset_array, pattern_size);
+
+        //This is the pattern index array used to find the neighbors
+        int[] input_pattern_linear = new int[]
+        {
+            0,1,0,-1,
+            1,0,1,-1,
+            0,1,0,-1,
+            -1,-1,-1,-1,
+        };
+        int[][] pattern_array = LinearArrayToSquare(input_pattern_linear, (int)Mathf.Sqrt(input_offset_linear.Length));
+        List<Pattern> output_neighbor_list = WFCPattern.GetNeighbors(pattern_array, pattern_size,pattern_list);
+
+        /////////////////////////////////////////////////////     OUTPUT
+        int[][] output_first_pattern_neighbors = ListIntToArray(output_neighbor_list[0].possible_neighbors);
+        int[][] output_last_pattern_neighbors = ListIntToArray(output_neighbor_list[output_neighbor_list.Count - 1].possible_neighbors);
+
+        int[][] expected_first_neighbors = new int[4][];
+        expected_first_neighbors[0] = new int[] { 1 }; //Top
+        expected_first_neighbors[1] = new int[] { 1 }; //Right
+        expected_first_neighbors[2] = new int[] { 1 }; //Bot
+        expected_first_neighbors[3] = new int[] { 1 }; //Left
+
+        int[][] expected_last_neighbors = new int[4][];
+        expected_last_neighbors[0] = new int[] { 0 }; //Top
+        expected_last_neighbors[1] = new int[] { 0 }; //Right
+        expected_last_neighbors[2] = new int[] { 0 }; //Bot
+        expected_last_neighbors[3] = new int[] { 0 }; //Left
+
+
+        ///////////////     COMPARISON
+        bool result = true;
+        if (!CompareArrays(output_first_pattern_neighbors, expected_first_neighbors))
+            result = false;
+        if (!CompareArrays(output_last_pattern_neighbors, expected_last_neighbors))
+            result = false;
+
+        if (debug) Debug.Log("<color=red> GetNeighbors_ChessPatternPatternSizeTwo_FirstLastMatches: " +
+            result + "</color>\n" +
+            "Offset linear array: \n" + ReadIntArrayLinear(input_offset_linear) + "\n" +
+            "Expected neighbors of first pattern: \n" + ReadIntArraySquare((expected_first_neighbors)) + "\n" +
+            "Output neighbors of first pattern: \n" + ReadIntArraySquare((output_first_pattern_neighbors)) + "\n" +
+            "Expected neighbors of last pattern: \n" + ReadIntArraySquare((expected_last_neighbors)) + "\n" +
+            "Output neighbors of last pattern: \n" + ReadIntArraySquare((output_last_pattern_neighbors)) + "\n"
+            ); 
+
+        return result;
+    }
+    #endregion
     #region Pattern Array 
     bool GetPatternArray_ChessPatternOffsetPatternSizeTwo_PatternIdentificationMatches(bool debug)
     {
