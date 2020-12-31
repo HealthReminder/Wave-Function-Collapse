@@ -53,6 +53,9 @@ public class UnitTestsPattern : UnitTestsBase
         result_module = GetNeighbors_HorizontalLinesPatternSizeTwo_FirstLastMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
+        result_module = GetNeighbors_ComplexPatternSizeTwo_FirstLastMatches(display_internal);
+        result_unit = (result_module) ? result_unit : false;
+
 
         if (result_unit)
             Debug.Log("<color=#191919> Result of pattern testing: </color><color=green>True</color>");
@@ -63,7 +66,70 @@ public class UnitTestsPattern : UnitTestsBase
         yield break;
     }
     #region Neighboring
+    bool GetNeighbors_ComplexPatternSizeTwo_FirstLastMatches(bool debug)
+    {
+        ////////////////////////////////////////////////////      INPUT
+        int pattern_size = 2;
+        //This is the offset array to get unique pattern list
+        int[] input_offset_linear = new int[]
+        {
+            4,5,4,5,
+            7,6,7,6,
+            4,5,4,5,
+            7,6,7,6,
+        };
+        int[][] offset_array = LinearArrayToSquare(input_offset_linear, (int)Mathf.Sqrt(input_offset_linear.Length));
+        List<Pattern> pattern_list = WFCPattern.GetUniquePatterns(offset_array, pattern_size);
 
+        //This is the pattern index array used to find the neighbors
+        int[] input_pattern_linear = new int[]
+        {
+            0,1,0,-1,
+            2,3,2,-1,
+            0,1,0,-1,
+            -1,-1,-1,-1,
+        };
+        int[][] pattern_array = LinearArrayToSquare(input_pattern_linear, (int)Mathf.Sqrt(input_offset_linear.Length));
+        List<Pattern> output_neighbor_list = WFCPattern.GetNeighbors(pattern_array, pattern_size, pattern_list);
+        //  0,1 ->0     1,0 ->1     3,2 ->2     2,3 ->3
+        //  3,2         2,3         0,1         1,0
+
+        /////////////////////////////////////////////////////     OUTPUT
+        int[][] output_first_pattern_neighbors = ListIntToArray(output_neighbor_list[0].possible_neighbors);
+        int[][] output_last_pattern_neighbors = ListIntToArray(output_neighbor_list[output_neighbor_list.Count - 1].possible_neighbors);
+
+        int[][] expected_first_neighbors = new int[4][];  //0
+        expected_first_neighbors[0] = new int[] { 2 }; //Top
+        expected_first_neighbors[1] = new int[] { 1 }; //Right
+        expected_first_neighbors[2] = new int[] { 2 }; //Bot
+        expected_first_neighbors[3] = new int[] { 1 }; //Left
+
+        int[][] expected_last_neighbors = new int[4][];  //1
+        expected_last_neighbors[0] = new int[] { 1 }; //Top
+        expected_last_neighbors[1] = new int[] { 2 }; //Right
+        expected_last_neighbors[2] = new int[] { 1 }; //Bot
+        expected_last_neighbors[3] = new int[] { 2 }; //Left
+
+        ///////////////     COMPARISON
+        bool result = true;
+        if (!CompareArrays(output_first_pattern_neighbors, expected_first_neighbors))
+            result = false;
+        if (!CompareArrays(output_last_pattern_neighbors, expected_last_neighbors))
+            result = false;
+
+        if (debug) Debug.Log(string.Format("<color=red> GetNeighbors_ComplexPatternSizeTwo_FirstLastMatches: {0} </color> \n" +
+            "Offset linear array: \n{1}\n" +
+            "Expected neighbors of first pattern : \n{2}" +
+            "Output neighbors of first pattern: \n{3}{4}" +
+            "Expected neighbors of last pattern: \n{5}" +
+            "Output neighbors of last pattern: \n{6}{7}"
+            , result, ReadIntArrayLinear(input_offset_linear),
+             ReadIntArraySquare(expected_first_neighbors), ReadIntArraySquare(output_neighbor_list[0].values), ReadIntArraySquare(output_first_pattern_neighbors),
+             ReadIntArraySquare(expected_last_neighbors), ReadIntArraySquare(output_neighbor_list[output_neighbor_list.Count - 1].values), ReadIntArraySquare(output_last_pattern_neighbors)
+            ));
+
+        return result;
+    }
     bool GetNeighbors_HorizontalLinesPatternSizeTwo_FirstLastMatches(bool debug)
     {
         ////////////////////////////////////////////////////      INPUT
@@ -125,7 +191,7 @@ public class UnitTestsPattern : UnitTestsBase
             ));
 
         return result;
-    }
+    } 
     bool GetNeighbors_VerticalLinesPatternSizeTwo_FirstLastMatches(bool debug)
     {
         ////////////////////////////////////////////////////      INPUT
@@ -290,10 +356,10 @@ public class UnitTestsPattern : UnitTestsBase
         int pattern_size = 2;
         int[] offset_linear = new int[]
         {
-            1,2,1,2,
-            4,3,4,3,
-            1,2,1,2,
-            4,3,4,3
+            4,5,4,5,
+            7,6,7,6,
+            4,5,4,5,
+            7,6,7,6
         };
         int[][] offset_array = LinearArrayToSquare(offset_linear, (int)Mathf.Sqrt(offset_linear.Length));
 
@@ -359,10 +425,10 @@ public class UnitTestsPattern : UnitTestsBase
         int pattern_size = 3;
         int[] offset_linear = new int[]
         {
-            1,2,1,2,
-            4,3,4,3,
-            1,2,1,2,
-            4,3,4,3
+            4,5,4,5,
+            7,6,7,6,
+            4,5,4,5,
+            7,6,7,6
         };
         int[][] offset_array = LinearArrayToSquare(offset_linear, (int)Mathf.Sqrt(offset_linear.Length));
 
@@ -410,33 +476,33 @@ public class UnitTestsPattern : UnitTestsBase
         int pattern_size = 2;
         int[] offset_linear = new int[]
         {
-            1,2,1,2,
-            4,3,4,3,
-            1,2,1,2,
-            4,3,4,3
+            4,5,4,5,
+            7,6,7,6,
+            4,5,4,5,
+            7,6,7,6
         };
         int[][] offset_array = LinearArrayToSquare(offset_linear, (int)Mathf.Sqrt(offset_linear.Length));
 
         int[][] output_expected = new int[4][];
         output_expected[0] = new int[]
         {
-            1,2,
-            4,3
+            4,5,
+            7,6
         };
         output_expected[1] = new int[]
         {
-            2,1,
-            3,4
+            5,4,
+            6,7
         };
         output_expected[2] = new int[]
         {
-            4,3,
-            1,2
+            7,6,
+            4,5
         };
         output_expected[3] = new int[]
         {
-            3,4,
-            2,1
+            6,7,
+            5,4
         };
         List<Pattern> unique_patterns = WFCPattern.GetUniquePatterns(offset_array, pattern_size);
         int[][] pattern_list_to_array = PatternListToArray(unique_patterns);
