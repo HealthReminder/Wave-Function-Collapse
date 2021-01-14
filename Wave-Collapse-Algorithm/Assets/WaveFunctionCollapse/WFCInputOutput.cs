@@ -62,19 +62,17 @@ namespace WaveFunctionCollapse
         {
             //Get useful variables
             int result_size = coll.Length * pattern_size;
-            //Setup result array
+            //Setup result array by multiplying the pattern array by the pattern size
             int[][] result;
             result = new int[result_size][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new int[result_size];
 
             for (int i = 0; i < result.Length; i++)
-            {
                 for (int o = 0; o < result[i].Length; o++)
-                {
                     result[i][o] = -1;
-                }
-            }
+
+
             //Go on every pattern that will be in resulting array (therefore skipping by pattern size)
             for (int y = 0; y < result_size; y += pattern_size)
             {
@@ -85,20 +83,20 @@ namespace WaveFunctionCollapse
                     List<int> possible_solutions = coll[y / pattern_size][x / pattern_size];
 
                     /*This code seemed to have worked for 2x2 pattern size but wtf
-                    int off_x = 0;
-                    int off_y = 0;
-                    //Third pattern (bot-right)
-                    if (y / pattern_size % 2 != 0 && x / pattern_size % 2 != 0)
-                        off_y = 1;
-                    //First pattern (top-left)
-                    else if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
-                        off_x = 1;
-                    //Fourth pattern (bot-left)
-                    if (y / pattern_size % 2 != 0 && x / pattern_size % 2 == 0)
-                    {
-                        off_x = 1;
-                        off_y = 1;
-                    }
+                     int off_x = 0;
+                     int off_y = 0;
+                     //Third pattern (bot-right)
+                        if (y / pattern_size % 2 != 0 && x / pattern_size % 2 != 0)
+                            off_y = 1;
+                        //First pattern (top-left)
+                        else if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
+                            off_x = 1;
+                     //Fourth pattern (bot-left)
+                     if (y / pattern_size % 2 != 0 && x / pattern_size % 2 == 0)
+                      {
+                          off_x = 1;
+                          off_y = 1;
+                        }
                     */
 
 
@@ -110,15 +108,15 @@ namespace WaveFunctionCollapse
                             //Check if cell of pattern is within bounds of resulting array
                             if (x + a >= 0 && x + a < result_size && y + b >= 0 && y + b < result_size)
                             {
-                                //This cell of this pattern has not been observed
                                 if (possible_solutions == null)
+                                    //This cell has not been observed yet
                                     result[y + b][x + a] = -2;
-                                //This cell of this pattern has been observed but it is overlapping
                                 else if (possible_solutions.Count != 1)
+                                    //This cell of this pattern has been observed but has more than one solution
                                     result[y + b][x + a] = -1;
-                                //This cell of this pattern has been collapsed already
                                 else
                                 {
+                                    //This cell has been collapsed already
                                     Pattern current_pattern = patterns[possible_solutions[0]];
 
                                     //For SOME REASON? The rotation of the pattern change when creating the output

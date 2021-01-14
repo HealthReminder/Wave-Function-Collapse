@@ -30,7 +30,7 @@ public class MultipleTester : MonoBehaviour
     List<int>[][] collapsing;
     int[][] entropy;
     int[][] output;
-    char[][] result;
+    int[][] result;
     #endregion
     #endregion
 
@@ -101,7 +101,7 @@ public class MultipleTester : MonoBehaviour
             for (int x = 0; x < side; x++)
             {
                 int index = -1;
-                int type = indexes[x][y];
+                int type = indexes[y][x];
                 for (int i = 0; i < l; i++)
                 {
                     if (tiles[i].type == type)
@@ -137,41 +137,22 @@ public class MultipleTester : MonoBehaviour
         else if (entropy == null)
             Debug.LogError("Cannot collapse null entropy array.");
 
-
         #region WFC Algorithm
-        //FOR DEBUG ONLY
-        initial_pattern = Random.Range(0,all_patterns.Count);
-        Debug.LogWarning("Fixed initial pattern collapse of index 0");
-        initial_pattern = 0;
-        Vector2 initial_collapse;
         //FIRST CELL COLLAPSE --------------------------------------------------------------------
+        Vector2 initial_collapse = new Vector2(-1,-1);
         if (initial_pattern != -1)
-        {
-            if (initial_x == -1)
-                initial_x = 0;//Random.Range(0, output_size);
-            if (initial_y == -1)
-                initial_y = 0;//Random.Range(0, output_size);
-            initial_collapse = new Vector2(initial_x, initial_y);
-            collapsing[initial_x][initial_y] = WFCCollapse.GetHyperstate(all_patterns);
-            WFCCollapse.CollapseCell(collapsing, entropy, initial_collapse, all_patterns, initial_pattern);
-            //After collapse, remove from infinite list
-            Debug.Log("Collapsed first cell of coordinates: " + initial_x + "," + initial_y + " from " + all_patterns.Count);
-        } else
+            CollapseInitialCell(all_patterns,initial_pattern,initial_x, initial_y);
+        else
             initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
 
         string log = ReadArrayList(collapsing);
-        Debug.Log("<color=cyan> Initial solution collapse: </color> \n" + log);
+        Debug.Log("<color=yellow> Tile array: </color> \n" + ReadArrayInt(input_constrained));
+        Debug.Log("<color=cyan> Initial pattern array collapse: </color> \n" + log);
 
-
-        Debug.Log("<color=yellow> " + "Interpreted input array" + " collapse: </color> \n" + ReadArrayChar(InterpretOutput(input_constrained)));
-
-        //READ OUTPUT
+        //Log initial cell collapse
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-        //log = ReadArray(output);
-        //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
-        result = InterpretOutput(output);
-        log = ReadArrayChar(result);
-        Debug.Log("<color=green> " + "Initial interpreted output array" + " collapse: </color> \n" + log);
+        log = ReadArrayInt(output);
+        Debug.Log("<color=green>Initial output array collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
         //Loop until no left cells and result is valid
@@ -212,37 +193,22 @@ public class MultipleTester : MonoBehaviour
         #endregion
         yield break;
     }
-    char[][] InterpretOutput(int[][] arr)
+    Vector2 CollapseInitialCell (List<Pattern> all_patterns,int initial_pattern, int x, int y)
     {
-        //This should be provided by the reading of the input tileset
-        char char_invalid = '?';
-        List<char> char_list = new List<char>() { '░', '▒', '▒', '▓', '▓', '▒', '░', '▒', '▓', '▓' };
+        initial_pattern = 0;
 
-        //Setup result array
-        int h = arr.Length;
-        int w = arr[0].Length;
-        char[][] result = new char[h][];
-        for (int y = 0; y < h; y++)
-            result[y] = new char[w];
-
-        //Convert index into chars
-        //Or tiles
-        for (int y = 0; y < h; y++)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                result[x][y] = char_invalid;
-                //Debug.Log("1");
-                int i = arr[x][y];
-                //Debug.Log(i);
-                if (i >= 0 && i < char_list.Count)
-                    result[x][y] = char_list[i];
-                //Debug.Log("3");
-
-            }
-        }
-        return result;
+        if (x == -1)
+            x = 0;//Random.Range(0, output_size);
+        if (y == -1)
+            y = 0;//Random.Range(0, output_size);
+        Vector2 coords = new Vector2(x, y);
+        collapsing[x][y] = WFCCollapse.GetHyperstate(all_patterns);
+        WFCCollapse.CollapseSpecificCell(collapsing, entropy, coords, all_patterns, initial_pattern);
+        //After collapse, remove from infinite list
+        Debug.Log("Collapsed first cell of coordinates: " + x + "," + y + " from " + all_patterns.Count);
+        return coords;
     }
+    
     void SetupCollapseArrays(int s)
     {
         collapsing = new List<int>[s][];
@@ -251,7 +217,7 @@ public class MultipleTester : MonoBehaviour
 
         for (int y = 0; y < s; y++)
             for (int x = 0; x < s; x++)
-                collapsing[x][y] = new List<int>();
+                collapsing[y][x] = new List<int>();
 
 
         entropy = new int[s][];
@@ -259,7 +225,7 @@ public class MultipleTester : MonoBehaviour
             entropy[i] = new int[s];
         for (int i = 0; i < s; i++)
             for (int o = 0; o < s; o++)
-                entropy[o][i] = 0;
+                entropy[i][o] = 0;
 
     }
     bool CheckValidity(int[][] entr, int length)

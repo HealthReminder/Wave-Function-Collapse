@@ -9,7 +9,7 @@ namespace WaveFunctionCollapse
     {
         //COMECA A TRANSFORMAR ESSA COROTINA NA ROTINA DO TESTER
         //AQUI SO TERA FUNCOES QUE RETORNAM TIPOS E NO ROUTINAS
-        public static void CollapseCell(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
+        public static void CollapseSpecificCell(List<int>[][] coll, int[][] entr, Vector2 coords, List<Pattern> patterns, int collapse_into = -1)
         {
             List<int> cell = coll[(int)coords.x][(int)coords.y];
             if (cell == null)
@@ -61,7 +61,7 @@ namespace WaveFunctionCollapse
             int index = Random.Range(0, hyperstates.Count);
             int i = (int)hyperstates[index].x; int o = (int)hyperstates[index].y;
             coll[i][o] = GetHyperstate(patterns);
-            CollapseCell(coll, entr, new Vector2(i, o), patterns);
+            CollapseSpecificCell(coll, entr, new Vector2(i, o), patterns);
 
             //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
             return hyperstates[index];
@@ -104,7 +104,7 @@ namespace WaveFunctionCollapse
                             possible_cells.Add(new Vector2(x, y));
                 //0 will always be the cell in the middle. The others are its neighbors if any
                 Vector2 r_cell = possible_cells[Random.Range(0, possible_cells.Count)];
-                CollapseCell(coll, entr, r_cell, patterns);
+                CollapseSpecificCell(coll, entr, r_cell, patterns);
 
             }
             //Debug.Log("Chosen cell " + chosen_cell + " within cells of entropy of " + lowest_entropy);
@@ -256,36 +256,32 @@ namespace WaveFunctionCollapse
         {
             int count = 0;
             if (y - 1 >= 0)
-            {
                 if (entr[x][y - 1] == -1)
                     count += 3;
-            }
+
             else
                 count++;
 
             if (x + 1 < entr.Length)
-            {
                 if (entr[x + 1][y] == -1)
                     count += 3;
-            }
+
             else
                 count++;
 
 
             if (y + 1 < entr[0].Length)
-            {
                 if (entr[x][y + 1] == -1)
                     count += 3;
-            }
+
             else
                 count++;
 
 
             if (x - 1 >= 0)
-            {
                 if (entr[x - 1][y] == -1)
                     count+=3;
-            }
+
             else
                 count++;
 
