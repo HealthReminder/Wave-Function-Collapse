@@ -202,7 +202,7 @@ public class MultipleTester : MonoBehaviour
         if (y == -1)
             y = 0;//Random.Range(0, output_size);
         Vector2 coords = new Vector2(x, y);
-        collapsing[x][y] = WFCCollapse.GetHyperstate(all_patterns);
+        collapsing[x][y] = WFCCollapse.GetHyperstates(all_patterns);
         WFCCollapse.CollapseSpecificCell(collapsing, entropy, coords, all_patterns, initial_pattern);
         //After collapse, remove from infinite list
         Debug.Log("Collapsed first cell of coordinates: " + x + "," + y + " from " + all_patterns.Count);

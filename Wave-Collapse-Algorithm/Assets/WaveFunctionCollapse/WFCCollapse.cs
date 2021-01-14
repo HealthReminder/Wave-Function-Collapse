@@ -60,7 +60,7 @@ namespace WaveFunctionCollapse
             //Get a random hyper cell and collapse it.
             int index = Random.Range(0, hyperstates.Count);
             int i = (int)hyperstates[index].x; int o = (int)hyperstates[index].y;
-            coll[i][o] = GetHyperstate(patterns);
+            coll[i][o] = GetHyperstates(patterns);
             CollapseSpecificCell(coll, entr, new Vector2(i, o), patterns);
 
             //Debug.Log("Collapsed random cell of coordinates: " + x + "," + y + " into "+arr[x][y][0]+" from " + patterns.Count + " patterns with a resulting infinite list of length " + hyperstates.Count);
@@ -289,10 +289,10 @@ namespace WaveFunctionCollapse
             //Debug.Log("Cell has " + count + "collapsed neighbors");
             return (count*count);
         }
-        public static List<int> GetHyperstate(List<Pattern> patterns)
+        public static List<int> GetHyperstates(List<Pattern> hyper_patterns)
         {
             List<int> p = new List<int>();
-            for (int i = 0; i < patterns.Count; i++)
+            for (int i = 0; i < hyper_patterns.Count; i++)
                 p.Add(i);
             return p;
         }

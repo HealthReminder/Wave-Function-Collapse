@@ -16,7 +16,8 @@ public class UnitTestsInput : UnitTestsBase
 
     IEnumerator TestInput(bool display_internal)
     {
-        Debug.LogWarning("Input testing is deprecated for now.");
+        Debug.LogWarning("Input testing is deprecated for now. I don't want to mess with tile behaviour because it is not directly a part of WFC.");
+
         yield break;
 
         yield return new WaitForSeconds(order);
@@ -26,28 +27,24 @@ public class UnitTestsInput : UnitTestsBase
 
 
         //Test Constraint Array Extraction
-        bool result_constraint = true;
-        bool unit_result = true;
+        bool result_module = true;
+        bool result_unit = true;
 
         //1,1,0,0
         //1,1,0,0
         //1,1,0,0
-        unit_result = GetConstraintArray_ProperIdentification_VerticalSlice();
-        //Print the result if required
-        if (display_internal) Debug.Log("<color=blue> GetConstraintArray_ProperIdentification_VerticalSlice: " + unit_result + "</color>");
-        //Check if routine has failed
-        result_constraint = (unit_result) ? result_constraint:false;
+        result_unit = GetConstraintArray_VerticalSlice_ProperPatternIndex(display_internal);
+        result_unit = (result_module) ? result_unit : false;
 
-
-        if (result_constraint)
-            Debug.Log("<color=#000000> Result of constraint testing: </color><color=green>True</color>");
+        if (result_unit)
+            Debug.Log("Result of constraint testing: <color=green>True</color>");
         else
-            Debug.LogError("<color=#000000> Result of constraint testing: </color><color=red>False</color>");
+            Debug.LogError("Result of constraint testing: <color=red>False</color>");
 
         yield break;
     }
     #region Input Tests
-    bool GetConstraintArray_ProperIdentification_VerticalSlice()
+    bool GetConstraintArray_VerticalSlice_ProperPatternIndex(bool debug)
     {
         Tile[] input_tiles = IntArrayToTileArray(new int[]
         {
@@ -68,6 +65,10 @@ public class UnitTestsInput : UnitTestsBase
         int[][] output_square = InputReader.GetConstraintArray(input_tiles);
         int[] output_linear = SquareArrayToLinear(output_square);
         result = CompareLinearArrays(output_linear, output_expected);
+
+        //if (debug) Debug.Log("<color=blue> GetOffsetArray_PatternSizeOne_NoPadding: " + result + "</color>\n" +
+            //ReadIntArrayLinear(input_linear) + "\n" + ReadIntArrayLinear(output_linear) + "\n" + ReadIntArrayLinear(output_expected));
+
         return result;
     }
     Tile[] IntArrayToTileArray(int[] input_array)

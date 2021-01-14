@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 122571442}
   - component: {fileID: 122571444}
   - component: {fileID: 122571445}
+  - component: {fileID: 122571446}
   m_Layer: 0
   m_Name: WFCUnitTests
   m_TagString: Untagged
@@ -179,7 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1417ef51a12c6b844b5d4012ac87b6a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  order: 0
+  order: 0.1
 --- !u!114 &122571445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,7 +193,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5854608d56811c84f8f7531f96bad6dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  order: 0.1
+  order: 0.2
+--- !u!114 &122571446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122571441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4133dc0450bad0f468e8038cc747a046, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  order: 0.3
 --- !u!1 &187371464
 GameObject:
   m_ObjectHideFlags: 0
