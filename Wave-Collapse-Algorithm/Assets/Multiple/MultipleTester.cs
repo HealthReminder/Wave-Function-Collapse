@@ -109,10 +109,10 @@ public class MultipleTester : MonoBehaviour
                 }
 
                 if (index == -1)
-                    Instantiate(invalid_tile, new Vector3(x+250, -10, -y + 250), Quaternion.identity);
+                    Instantiate(invalid_tile, new Vector3(y+250, -10, -x + 250), Quaternion.identity);
                  else
                 {
-                    Instantiate(tiles[index], new Vector3(x + 250, -10, -y + 250), Quaternion.identity);
+                    Instantiate(tiles[index], new Vector3(y + 250, -10, -x + 250), Quaternion.identity);
 
                 }
 
@@ -174,10 +174,10 @@ public class MultipleTester : MonoBehaviour
                 //READ OUTPUT
                 output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
                 log = ReadArrayInt(output);
-                Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
+                //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
                 //result = InterpretOutput(output);
-                //log = ReadArrayChar(result);
-                //Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
+                log = ReadArrayList(collapsing);
+                Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
                 if (CheckValidity(entropy, output_size))
                     break;

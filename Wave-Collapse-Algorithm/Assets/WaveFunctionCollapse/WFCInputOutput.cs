@@ -133,7 +133,7 @@ namespace WaveFunctionCollapse
                                     while (off_b >= pattern_size)
                                         off_b -= pattern_size;
 
-                                    result[y + b][x + a] = possible_solutions[0];
+                                    result[y + b][x + a] = current_pattern.values[off_b][off_a];
 
                                     //This codes lets you figure out the location of the pattern (topleft top right bot right bot left)
                                     //if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
