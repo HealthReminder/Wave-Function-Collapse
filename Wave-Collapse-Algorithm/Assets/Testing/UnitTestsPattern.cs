@@ -36,10 +36,16 @@ public class UnitTestsPattern : UnitTestsBase
         result_module = GetPatternArray_ComplexOffsetPatternSizeTwo_PatternIdentificationMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
+        result_module = GetPatternArray_ChessPatternOffsetPatternSizeTwo_PatternIdentificationMatches(display_internal);
+        result_unit = (result_module) ? result_unit : false;
+
         result_module = GetPatternArray_ComplexOffsetPatternSizeThree_PatternIdentificationMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
-        result_module = GetPatternArray_ChessPatternOffsetPatternSizeTwo_PatternIdentificationMatches(display_internal);
+        result_module = GetPatternArray_RealOffsetPatternSizeFour_PatternIdentificationMatches(display_internal);
+        result_unit = (result_module) ? result_unit : false;
+
+        result_module = GetPatternArray_ComplexOffsetPatternSizeFour_PatternIdentificationMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
         ////////////////////////////////////////////////////////////////////////////////// NEIGHBOR TESTS
@@ -56,6 +62,7 @@ public class UnitTestsPattern : UnitTestsBase
         result_module = GetNeighbors_ComplexPatternSizeTwo_FirstLastMatches(display_internal);
         result_unit = (result_module) ? result_unit : false;
 
+        
 
         if (result_unit)
             Debug.Log("<color=#191919> Result of pattern testing: </color><color=green>True</color>");
@@ -384,6 +391,45 @@ public class UnitTestsPattern : UnitTestsBase
 
         return result;
     }
+    bool GetPatternArray_RealOffsetPatternSizeFour_PatternIdentificationMatches(bool debug)
+    {
+        int pattern_size = 2;
+        int[] offset_linear = new int[]
+        {
+            8,8,0,0,8,8,0,
+            8,8,0,0,8,8,0,
+            7,7,6,6,7,7,6,
+            7,7,6,6,7,7,6,
+            8,8,0,0,8,8,0,
+            8,8,0,0,8,8,0,
+            7,7,6,6,7,7,6,
+        };
+        int[][] offset_array = LinearArrayToSquare(offset_linear, (int)Mathf.Sqrt(offset_linear.Length));
+
+        List<Pattern> unique_patterns = WFCPattern.GetUniquePatterns(offset_array, pattern_size);
+        //////////////////////////////////////////////
+
+        int[] output_expected = new int[]
+       {
+            0,1,2,3,-1,-1,-1,
+            4,5,6,7,-1,-1,-1,
+            8,9,10,11,-1,-1,-1,
+            12,13,14,15,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1,-1,
+
+       };
+
+        //////////////////////////////////////////////
+        int[][] output_square = WFCPattern.GetPatternArray(offset_array, pattern_size, unique_patterns);
+        int[] output_linear = SquareArrayToLinear(output_square);
+        bool result = CompareLinearArrays(output_linear, output_expected);
+        if (debug) Debug.Log("<color=magenta> GetPatternArray_RealOffsetPatternSizeFour_PatternIdentificationMatches: " + result + "</color>\n" +
+           ReadIntArrayLinear(offset_linear) + "\n" + ReadIntArrayLinear((output_expected)) + "\n" + ReadIntArrayLinear(SquareArrayToLinear(output_square)));
+
+        return result;
+    }
     bool GetPatternArray_ComplexOffsetPatternSizeThree_PatternIdentificationMatches(bool debug)
     {
         int pattern_size = 3;
@@ -413,6 +459,43 @@ public class UnitTestsPattern : UnitTestsBase
         int[] output_linear = SquareArrayToLinear(output_square);
         bool result = CompareLinearArrays(output_linear, output_expected);
         if (debug) Debug.Log("<color=magenta> GetPatternArray_ComplexOffsetPatternSizeThree_PatternIdentificationMatches: " + result + "</color>\n" +
+           ReadIntArrayLinear(offset_linear) + "\n" + ReadIntArrayLinear((output_expected)) + "\n" + ReadIntArrayLinear(SquareArrayToLinear(output_square)));
+
+        return result;
+    }
+    bool GetPatternArray_ComplexOffsetPatternSizeFour_PatternIdentificationMatches(bool debug)
+    {
+        int pattern_size = 3;
+        int[] offset_linear = new int[]
+        {
+            1,2,1,2,1,2,
+            4,3,4,3,4,3,
+            1,2,1,2,1,2,
+            4,3,4,3,4,3,
+            1,2,1,2,1,2,
+            4,3,4,3,4,3,
+        };
+        int[][] offset_array = LinearArrayToSquare(offset_linear, (int)Mathf.Sqrt(offset_linear.Length));
+
+        List<Pattern> unique_patterns = WFCPattern.GetUniquePatterns(offset_array, pattern_size);
+        //////////////////////////////////////////////
+
+        int[] output_expected = new int[]
+       {
+            0,1,0,-1,-1,-1,
+            2,3,2,-1,-1,-1,
+            0,1,0,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1,-1
+
+       };
+
+        //////////////////////////////////////////////
+        int[][] output_square = WFCPattern.GetPatternArray(offset_array, pattern_size, unique_patterns);
+        int[] output_linear = SquareArrayToLinear(output_square);
+        bool result = CompareLinearArrays(output_linear, output_expected);
+        if (debug) Debug.Log("<color=magenta> GetPatternArray_ComplexOffsetPatternSizeFour_PatternIdentificationMatches: " + result + "</color>\n" +
            ReadIntArrayLinear(offset_linear) + "\n" + ReadIntArrayLinear((output_expected)) + "\n" + ReadIntArrayLinear(SquareArrayToLinear(output_square)));
 
         return result;
