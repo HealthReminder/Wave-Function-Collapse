@@ -19,7 +19,7 @@ public class MultipleTester : MonoBehaviour
     int[][] output_for_display;
     #endregion
     #region WFC
-    public int pattern_size = 3;
+    public int pattern_size;
     public int output_size = 30;
     #region Active
     int[][] input_unique;
