@@ -16,7 +16,7 @@ public class UnitTestsInput : UnitTestsBase
 
     IEnumerator TestInput(bool display_internal)
     {
-        Debug.LogWarning("Input testing is deprecated for now. I don't want to mess with tile behaviour because it is not directly a part of WFC.");
+        Debug.LogWarning("Skipped input test module.");
 
         yield break;
 

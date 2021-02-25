@@ -53,16 +53,16 @@ public class MultipleTester : MonoBehaviour
         //input_unique = InputReader.GetInput(dataset);
         //Debug.Log("<color=green> Generated input: </color>\n " + ReadArrayInt(input_unique));
         input_constrained = InputReader.GetConstraintArray(dataset);
-        Debug.Log("<color=green> Input grid: </color>\n " + ReadArrayInt(input_constrained));
+        Debug.Log("<color=green> Input grid: </color>\n " + ReadIntArraySquare(input_constrained));
 
         offset = WFCInputOutput.GetOffsetArray(input_constrained, pattern_size);
-        Debug.Log("<color=green> Offset grid: </color>\n " + ReadArrayInt(offset));
+        Debug.Log("<color=green> Offset grid: </color>\n " + ReadIntArraySquare(offset));
 
         unique = WFCPattern.GetUniquePatterns(offset,pattern_size);
         pattern = WFCPattern.GetPatternArray(offset,pattern_size,unique);
-        Debug.Log("<color=orange> Pattern grid output: </color>\n " + ReadArrayInt(pattern));
+        Debug.Log("<color=orange> Pattern grid output: </color>\n " + ReadIntArraySquare(pattern));
         Debug.LogWarning("There is no get neighbors yet!");
-        unique = WFCPattern.GetNeighbors(offset, pattern_size, unique);
+        unique = WFCPattern.GetNeighbors(pattern, pattern_size, unique);
         string log = "";
         for (int i = 0; i < unique.Count; i++)
             log += unique[i].GetValues() + "\n";
@@ -146,12 +146,12 @@ public class MultipleTester : MonoBehaviour
             initial_collapse = WFCCollapse.CollapseHyperCell(collapsing, entropy, all_patterns);
 
         string log = ReadArrayList(collapsing);
-        Debug.Log("<color=yellow> Tile array: </color> \n" + ReadArrayInt(input_constrained));
+        Debug.Log("<color=yellow> Tile array: </color> \n" + ReadIntArraySquare(input_constrained));
         Debug.Log("<color=cyan> Initial pattern array collapse: </color> \n" + log);
 
         //Log initial cell collapse
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-        log = ReadArrayInt(output);
+        log = ReadIntArraySquare(output);
         Debug.Log("<color=green>Initial output array collapse: </color> \n" + log);
 
         //LOOP COLLAPSE --------------------------------------------------------------------
@@ -173,9 +173,11 @@ public class MultipleTester : MonoBehaviour
 
                 //READ OUTPUT
                 output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-                log = ReadArrayInt(output);
+                log = ReadIntArraySquare(output);
                 //Debug.Log("<color=magenta> " + "Initial output array" + " collapse: </color> \n" + log);
                 //result = InterpretOutput(output);
+
+                //error here
                 log = ReadArrayList(collapsing);
                 Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
@@ -188,7 +190,7 @@ public class MultipleTester : MonoBehaviour
         //Creation was successful!
         //Generate the output
         output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
-        log = ReadArrayInt(output);
+        log = ReadIntArraySquare(output);
         Debug.Log("<color=magenta> " + "Output array" + " collapse: </color> \n" + log);
         #endregion
         yield break;
@@ -366,7 +368,31 @@ public class MultipleTester : MonoBehaviour
         log += "\n";
         return log;
     }
-    string ReadArrayInt(int[][] arr)
+    public string ReadIntArrayLinear(int[] arr)
+    {
+        int length = (int)Mathf.Sqrt(arr.Length);
+        string log = "";
+        if (arr == null)
+            log += ("NULL INT ARRAY");
+        else
+        {
+            for (int y = 0; y < length; y++)
+            {
+                for (int x = 0; x < length; x++)
+                {
+                    log += arr[x + y * length];
+                }
+                log += "\n";
+
+            }
+            log += "\n";
+        }
+
+        log += "\n";
+        return log;
+    }
+
+    public string ReadIntArraySquare(int[][] arr)
     {
         string log = "";
         if (arr == null)
@@ -377,7 +403,7 @@ public class MultipleTester : MonoBehaviour
             {
                 for (int x = 0; x < arr[y].Length; x++)
                 {
-                    log += arr[x][y];
+                    log += arr[y][x];
                 }
                 log += "\n";
 

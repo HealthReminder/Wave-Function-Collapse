@@ -28,8 +28,8 @@ namespace WaveFunctionCollapse
             int input_y, input_x, output_y, output_x;
             input_y = input.Length;
             input_x = input[0].Length;
-            output_y = input_y + padding + extra_padding;
-            output_x = input_x + padding + extra_padding;
+            output_y = input_y + padding - 1 + extra_padding;
+            output_x = input_x + padding - 1 + extra_padding;
             int[][] result = new int[output_y][];
 
             //Fill each cell of the output array

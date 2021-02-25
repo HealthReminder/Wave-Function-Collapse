@@ -235,15 +235,16 @@ namespace WaveFunctionCollapse
         public static int[][] GetPatternArray(int[][] offset, int pattern_size, List<Pattern> unique_patterns)
         {
             //Get sizes and setup result array
-            int size_x = offset.Length;
-            int size_y = offset[0].Length;
+            int size_y = offset.Length;
+            int size_x = offset[0].Length;
+
             int[][] pattern_array = new int[size_x][];
-            for (int x = 0; x < size_x; x++)
-                pattern_array[x] = new int[size_x];
+            for (int y = 0; y < size_y; y++)
+                pattern_array[y] = new int[size_x];
 
             for (int y = 0; y < size_y; y++)
                 for (int x = 0; x < size_x; x++)
-                    pattern_array[x][y] = offset[x][y];
+                    pattern_array[y][x] = offset[y][x];
 
             //This array will contain the indexes of the patterns each cell belongs to
             int[][] current_pattern = new int[pattern_size][];
@@ -457,4 +458,56 @@ namespace WaveFunctionCollapse
         }
 
     }
+    /* Pattern current_pattern = pat_list[arr[y][x]];
+
+                        //Cache all neighbors including duplicates
+                        List<int>[] all_possible_neighbors = new List<int>[4];
+                        for (int i = 0; i < 4; i++)
+                            all_possible_neighbors[i] = new List<int>();
+                        
+
+                        //Check if neighbor is valid
+                        if (y - 1 >= 0)
+                            if (arr[y - 1][x] != -1)
+                                //If this is not a neighbor already, add it
+                                if (!current_pattern.possible_neighbors[0].Contains(arr[y - 1][x]))
+                                    all_possible_neighbors[0].Add(arr[y - 1][x]);
+                        if (x + 1 < l)
+                            if (arr[y][x + 1] != -1)
+                                if (!current_pattern.possible_neighbors[1].Contains(arr[y][x + 1]))
+                                    all_possible_neighbors[1].Add(arr[y][x + 1]);
+                        if (y + 1 < l)
+                            if (arr[y + 1][x] != -1)
+                                if (!current_pattern.possible_neighbors[2].Contains(arr[y + 1][x]))
+                                    all_possible_neighbors[2].Add(arr[y + 1][x]);
+                        if (x - 1 >= 0)
+                            if (arr[y][x - 1] != -1)
+                                if (!current_pattern.possible_neighbors[3].Contains(arr[y][x - 1]))
+                                    all_possible_neighbors[3].Add(arr[y][x - 1]);
+
+                        //Cache all neighbors, skip duplicates
+                        List<int>[] unique_possible_neighbors = new List<int>[4];
+                        for (int i = 0; i < 4; i++)
+                            unique_possible_neighbors[i] = new List<int>();
+
+                        //For all 4 sides of the pattern, go over all the neighbors and cache the unique ones
+                        Debug.Log("Future reference: You may add neighbor side frequency here.");
+                        for (int i = 0; i < 4; i++)
+                        {
+                            for (int j = 0; j < all_possible_neighbors[i].Count; j++)
+                            {
+                                bool is_contained = false;
+                                for (int k = 0; k < unique_possible_neighbors[i].Count; k++)
+                                {
+                                    if (all_possible_neighbors[i][j] == unique_possible_neighbors[i][k])
+                                        is_contained = true;
+                                }
+
+                                if (!is_contained)
+                                    unique_possible_neighbors[i].Add(all_possible_neighbors[i][j]);
+                            }
+                        }
+
+                        current_pattern.possible_neighbors = unique_possible_neighbors;
+*/
 }
