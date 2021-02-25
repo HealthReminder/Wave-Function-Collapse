@@ -12,6 +12,10 @@ namespace WaveFunctionCollapse
         //Sides from up and clockwise (length 4)
         public int[][] sides;
         //Neighbors from north and clockwise (length 4)
+        //This is a list of possible neighbors
+        //In the future this might be a list of an array of int
+        //The first index of the list will be the pattern index
+        //The second index of the list will be the pattern frequency
         public List<int>[] possible_neighbors;
 
         public string GetValues()
@@ -377,7 +381,7 @@ namespace WaveFunctionCollapse
             GetNeighbors(pattern_array, pattern_size, pattern_list);
             return (pattern_array, pattern_list);
         }*/
-        public static List<Pattern> GetNeighbors(int[][] arr, int pat_size, List<Pattern> pat_list)
+        public static List<Pattern> GetNeighbors(int[][] pat_array, int pat_size, List<Pattern> pat_list)
         {
             //This function assume that the unique patterns were already cached in the pattern list
             int pattern_size = pat_list[0].values.Length;
@@ -389,55 +393,93 @@ namespace WaveFunctionCollapse
             else if (pat_list.Count <= 0)
                 Debug.LogError("Cannot fill patterns with empty pattern array.");
 
-            //For each unique pattern on list
-            //Add the current array selection neighboring unique pattern indexes 
-            //Setup neighbor patterns
+            //Instantiate possible neighbors array in each pattern found in the offset array
             for (int i = 0; i < pat_list.Count; i++)
             {
                 pat_list[i].possible_neighbors = new List<int>[4];
                 for (int o = 0; o < 4; o++)
                     pat_list[i].possible_neighbors[o] = new List<int>();
             }
-
-            //Go through the pattern array 
-            int l = arr.Length;
+            //Go through the pattern array and get neighbors
+            int l = pat_array.Length;
 
             for (int y = 0; y < l; y++)
             {
                 for (int x = 0; x < l; x++)
                 {
                     //Get the pattern from list
-                    int index = arr[y][x];
-                    
+                    int index = pat_array[y][x];
+
                     if (index != -1)
                     {
-                        Pattern current_pattern = pat_list[arr[y][x]];
+                        Pattern current_pattern = pat_list[pat_array[y][x]];
+
+                        //Cache all exisiting neighbors plus the new ones found
+                        List<int>[] all_possible_neighbors = new List<int>[4];
+                        for (int i = 0; i < 4; i++)
+                            all_possible_neighbors[i] = current_pattern.possible_neighbors[i];
+
+
                         //Check if neighbor is valid
                         if (y - 1 >= 0)
-                            if (arr[y - 1][x] != -1)
+                            if (pat_array[y - 1][x] != -1)
+                            {
                                 //If this is not a neighbor already, add it
-                                if (!current_pattern.possible_neighbors[0].Contains(arr[y - 1][x]))
-                                    current_pattern.possible_neighbors[0].Add(arr[y - 1][x]);
-                        if (x + 1 < l)
-                            if (arr[y][x + 1] != -1)
-                                if (!current_pattern.possible_neighbors[1].Contains(arr[y][x + 1]))
-                                    current_pattern.possible_neighbors[1].Add(arr[y][x + 1]);
-                        if (y + 1 < l)
-                            if (arr[y + 1][x] != -1)
-                                if (!current_pattern.possible_neighbors[2].Contains(arr[y + 1][x]))
-                                    current_pattern.possible_neighbors[2].Add(arr[y + 1][x]);
-                        if (x - 1 >= 0)
-                            if (arr[y][x - 1] != -1)
-                                if (!current_pattern.possible_neighbors[3].Contains(arr[y][x - 1]))
-                                    current_pattern.possible_neighbors[3].Add(arr[y][x - 1]);
+                                if (!current_pattern.possible_neighbors[0].Contains(pat_array[y - 1][x]))
+                                    all_possible_neighbors[0].Add(pat_array[y - 1][x]);
+                                //Debug.Log("For pattern: "+pat_array[y][x]+" found top neighbor of index: "+pat_array[y - 1][x]);
+                            }
 
-                        string[] debug_n = new string[4];
+                        if (x + 1 < l)
+                            if (pat_array[y][x + 1] != -1)
+                            {
+                                if (!current_pattern.possible_neighbors[1].Contains(pat_array[y][x + 1]))
+                                    all_possible_neighbors[1].Add(pat_array[y][x + 1]);
+                                //Debug.Log("For pattern: " + pat_array[y][x] + " found right neighbor of index: " + pat_array[y][x+1]);
+
+                            }
+                        if (y + 1 < l)
+                            if (pat_array[y + 1][x] != -1)
+                            {
+                                if (!current_pattern.possible_neighbors[2].Contains(pat_array[y + 1][x]))
+                                    all_possible_neighbors[2].Add(pat_array[y + 1][x]);
+                                //Debug.Log("For pattern: " + pat_array[y][x] + " found bottom neighbor of index: " + pat_array[y + 1][x]);
+
+                            }
+                        if (x - 1 >= 0)
+                            if (pat_array[y][x - 1] != -1)
+                            {
+                                if (!current_pattern.possible_neighbors[3].Contains(pat_array[y][x - 1]))
+                                    all_possible_neighbors[3].Add(pat_array[y][x - 1]);
+                                //Debug.Log("For pattern: " + pat_array[y][x] + " found left neighbor of index: " + pat_array[y][x - 1]);
+
+                            }
+
+                        //Cache all neighbors, skip duplicates
+                        List<int>[] unique_possible_neighbors = new List<int>[4];
                         for (int i = 0; i < 4; i++)
-                            if (current_pattern.possible_neighbors != null)
-                                if (current_pattern.possible_neighbors[i] != null)
-                                for (int o = 0; o < current_pattern.possible_neighbors[i].Count; o++)
-                                        debug_n[i] += current_pattern.possible_neighbors[i][o];
-                        //Debug.Log(string.Format("Neighbors of index {0} \n North: {1}\n East: {2}\n South: {3}\n West: {4} ",index, debug_n[0], debug_n[1], debug_n[2], debug_n[3]));
+                            unique_possible_neighbors[i] = new List<int>();
+
+                        //For all 4 sides of the pattern, go over all the neighbors and cache the unique ones
+                        //Debug.Log("Future reference: You may add neighbor side frequency here.");
+                        for (int i = 0; i < 4; i++)
+                        {
+                            for (int j = 0; j < all_possible_neighbors[i].Count; j++)
+                            {
+                                bool is_contained = false;
+                                for (int k = 0; k < unique_possible_neighbors[i].Count; k++)
+                                {
+                                    if (all_possible_neighbors[i][j] == unique_possible_neighbors[i][k])
+                                        is_contained = true;
+                                }
+
+                                if (!is_contained)
+                                    unique_possible_neighbors[i].Add(all_possible_neighbors[i][j]);
+                            }
+                        }
+                        current_pattern.possible_neighbors = all_possible_neighbors;
+                        //Debug.Log("For pattern "+ pat_array[y][x] + "\n"+ ReadArrayListInt(all_possible_neighbors));
+
                     }
                 }
             }
@@ -457,57 +499,32 @@ namespace WaveFunctionCollapse
             return true;
         }
 
-    }
-    /* Pattern current_pattern = pat_list[arr[y][x]];
-
-                        //Cache all neighbors including duplicates
-                        List<int>[] all_possible_neighbors = new List<int>[4];
-                        for (int i = 0; i < 4; i++)
-                            all_possible_neighbors[i] = new List<int>();
-                        
-
-                        //Check if neighbor is valid
-                        if (y - 1 >= 0)
-                            if (arr[y - 1][x] != -1)
-                                //If this is not a neighbor already, add it
-                                if (!current_pattern.possible_neighbors[0].Contains(arr[y - 1][x]))
-                                    all_possible_neighbors[0].Add(arr[y - 1][x]);
-                        if (x + 1 < l)
-                            if (arr[y][x + 1] != -1)
-                                if (!current_pattern.possible_neighbors[1].Contains(arr[y][x + 1]))
-                                    all_possible_neighbors[1].Add(arr[y][x + 1]);
-                        if (y + 1 < l)
-                            if (arr[y + 1][x] != -1)
-                                if (!current_pattern.possible_neighbors[2].Contains(arr[y + 1][x]))
-                                    all_possible_neighbors[2].Add(arr[y + 1][x]);
-                        if (x - 1 >= 0)
-                            if (arr[y][x - 1] != -1)
-                                if (!current_pattern.possible_neighbors[3].Contains(arr[y][x - 1]))
-                                    all_possible_neighbors[3].Add(arr[y][x - 1]);
-
-                        //Cache all neighbors, skip duplicates
-                        List<int>[] unique_possible_neighbors = new List<int>[4];
-                        for (int i = 0; i < 4; i++)
-                            unique_possible_neighbors[i] = new List<int>();
-
-                        //For all 4 sides of the pattern, go over all the neighbors and cache the unique ones
-                        Debug.Log("Future reference: You may add neighbor side frequency here.");
-                        for (int i = 0; i < 4; i++)
+        #region Debug
+        static string ReadArrayListInt(List<int>[] arraylistint)
+        {
+            string result = "";
+            if (arraylistint == null)
+                return ("Neighbors array is null");
+            else
+                for (int i = 0; i < arraylistint.Length; i++)
+                {
+                    if (arraylistint[i] == null)
+                        return ("Neighbors list for side " + i + " is null");
+                    else
+                    {
+                        result += "For side " + i + ": ";
+                        for (int o = 0; o < arraylistint[i].Count; o++)
                         {
-                            for (int j = 0; j < all_possible_neighbors[i].Count; j++)
-                            {
-                                bool is_contained = false;
-                                for (int k = 0; k < unique_possible_neighbors[i].Count; k++)
-                                {
-                                    if (all_possible_neighbors[i][j] == unique_possible_neighbors[i][k])
-                                        is_contained = true;
-                                }
-
-                                if (!is_contained)
-                                    unique_possible_neighbors[i].Add(all_possible_neighbors[i][j]);
-                            }
+                            result += arraylistint[i][o] + " ";
                         }
+                        result += "\n";
 
-                        current_pattern.possible_neighbors = unique_possible_neighbors;
-*/
+                    }
+                }
+            return result;
+        }
+        #endregion
+
+    }
+
 }
