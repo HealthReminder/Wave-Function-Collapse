@@ -46,14 +46,14 @@ namespace WaveFunctionCollapse
                 {
                     log += "For side: " + i + "\n";
                     int[][] l = values;
-                    int s = values.Length;
+                    int pattern_size = values.Length;
 
                     for (int o = 0; o < possible_neighbors[i].Count; o++)
                     {
-                        for (int y = 0; y < s; y++)
+                        for (int y = 0; y < pattern_size; y++)
                         {
-                            for (int x = 0; x < s; x++)
-                                log += pattern_list[possible_neighbors[i][o]].values[x][y];
+                            for (int x = 0; x < pattern_size; x++)
+                                log += pattern_list[possible_neighbors[i][o]].values[y][x];
                             log += "\n";
                         }
                         log += "\n";
@@ -478,7 +478,7 @@ namespace WaveFunctionCollapse
                             }
                         }
                         current_pattern.possible_neighbors = all_possible_neighbors;
-                        //Debug.Log("For pattern "+ pat_array[y][x] + "\n"+ ReadArrayListInt(all_possible_neighbors));
+                        Debug.Log("For pattern "+ pat_array[y][x] + "\n"+ ReadArrayListInt(all_possible_neighbors));
 
                     }
                 }

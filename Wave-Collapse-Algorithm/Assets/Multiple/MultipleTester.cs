@@ -85,7 +85,7 @@ public class MultipleTester : MonoBehaviour
 
         //Output an array of patterns of X size according to a pattern list
         //Optional parameters to include a preset first cell
-        yield return CollapseArray(output_size, unique, 1);
+        yield return CollapseArray(output_size, unique);
 
         StartCoroutine(InstantiateOutput(output, unique_tileset, invalid_tile));
 
@@ -335,12 +335,12 @@ public class MultipleTester : MonoBehaviour
             int s = arraylist[y].Length;
             for (int x = 0; x < s; x++)
             {
-                if (arraylist[y][x].Count <= 0)
+                if (arraylist[x][y].Count <= 0)
                     log += "▓";
-                else if (arraylist[y][x].Count > 1)
+                else if (arraylist[x][y].Count > 1)
                     log += "▒";
-                else if (arraylist[y][x].Count == 1)
-                    log += arraylist[y][x][0];
+                else if (arraylist[x][y].Count == 1)
+                    log += arraylist[x][y][0];
             }
             log += "\n";
         }
