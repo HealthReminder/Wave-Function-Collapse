@@ -61,7 +61,7 @@ namespace WaveFunctionCollapse
         public static int[][] GetOutputArray(List<int>[][] coll, List<Pattern> patterns, int pattern_size)
         {
             //Get useful variables
-            int result_size = coll.Length * pattern_size;
+            int result_size = coll.Length;
             //Setup result array by multiplying the pattern array by the pattern size
             int[][] result;
             result = new int[result_size][];
@@ -74,31 +74,13 @@ namespace WaveFunctionCollapse
 
 
             //Go on every pattern that will be in resulting array (therefore skipping by pattern size)
-            for (int y = 0; y < result_size; y += pattern_size)
+            for (int y = 0; y < result_size; y += 1)
             {
-                for (int x = 0; x < result_size; x += pattern_size)
+                for (int x = 0; x < result_size; x += 1)
                 {
                     //X and Y represents the "pivot" of the current pattern being transcribed
                     //Divide it by pattern size to cached the respective pattern
-                    List<int> possible_solutions = coll[y / pattern_size][x / pattern_size];
-
-                    /*This code seemed to have worked for 2x2 pattern size but wtf
-                     int off_x = 0;
-                     int off_y = 0;
-                     //Third pattern (bot-right)
-                        if (y / pattern_size % 2 != 0 && x / pattern_size % 2 != 0)
-                            off_y = 1;
-                        //First pattern (top-left)
-                        else if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
-                            off_x = 1;
-                     //Fourth pattern (bot-left)
-                     if (y / pattern_size % 2 != 0 && x / pattern_size % 2 == 0)
-                      {
-                          off_x = 1;
-                          off_y = 1;
-                        }
-                    */
-
+                    List<int> possible_solutions = coll[y][x];
 
                     //for each cell of the pattern fill it with the appropriate value
                     for (int b = 0; b < pattern_size; b++)
@@ -148,6 +130,76 @@ namespace WaveFunctionCollapse
                 }
             }
             return result;
+            /* //Get useful variables
+            int result_size = coll.Length * pattern_size;
+            //Setup result array by multiplying the pattern array by the pattern size
+            int[][] result;
+            result = new int[result_size][];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = new int[result_size];
+
+            for (int i = 0; i < result.Length; i++)
+                for (int o = 0; o < result[i].Length; o++)
+                    result[i][o] = -1;
+
+
+            //Go on every pattern that will be in resulting array (therefore skipping by pattern size)
+            for (int y = 0; y < result_size; y += pattern_size)
+            {
+                for (int x = 0; x < result_size; x += pattern_size)
+                {
+                    //X and Y represents the "pivot" of the current pattern being transcribed
+                    //Divide it by pattern size to cached the respective pattern
+                    List<int> possible_solutions = coll[y / pattern_size][x / pattern_size];
+
+                    //for each cell of the pattern fill it with the appropriate value
+                    for (int b = 0; b < pattern_size; b++)
+                    {
+                        for (int a = 0; a < pattern_size; a++)
+                        {
+                            //Check if cell of pattern is within bounds of resulting array
+                            if (x + a >= 0 && x + a < result_size && y + b >= 0 && y + b < result_size)
+                            {
+                                if (possible_solutions == null)
+                                    //This cell has not been observed yet
+                                    result[y + b][x + a] = -2;
+                                else if (possible_solutions.Count != 1)
+                                    //This cell of this pattern has been observed but has more than one solution
+                                    result[y + b][x + a] = -1;
+                                else
+                                {
+                                    //This cell has been collapsed already
+                                    Pattern current_pattern = patterns[possible_solutions[0]];
+
+                                    //For SOME REASON? The rotation of the pattern change when creating the output
+                                    //Therefore we have to rotate. This rotation was calculated manually
+
+                                    result[y + b][x + a] = current_pattern.values[b][a];
+                                    //int off_a = a + off_x;
+                                    int off_a = a;
+                                    while (off_a >= pattern_size)
+                                        off_a -= pattern_size;
+
+                                    //int off_b = b + off_y;
+                                    int off_b = b;
+                                    while (off_b >= pattern_size)
+                                        off_b -= pattern_size;
+
+                                    result[y + b][x + a] = current_pattern.values[off_b][off_a];
+
+                                    //This codes lets you figure out the location of the pattern (topleft top right bot right bot left)
+                                    //if (y / pattern_size % 2 == 0 && x / pattern_size % 2 == 0)
+                                    //result[x + a][y + b] = 0;
+
+                                    //result[x + a][y + b] = y/pattern_size;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            return result;*/
         }
     }
 }

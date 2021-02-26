@@ -478,7 +478,7 @@ namespace WaveFunctionCollapse
                             }
                         }
                         current_pattern.possible_neighbors = all_possible_neighbors;
-                        Debug.Log("For pattern "+ pat_array[y][x] + "\n"+ ReadArrayListInt(all_possible_neighbors));
+                        //Debug.Log("For pattern "+ pat_array[y][x] + "\n"+ ReadArrayListInt(all_possible_neighbors));
 
                     }
                 }

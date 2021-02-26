@@ -181,6 +181,9 @@ public class MultipleTester : MonoBehaviour
                 log = ReadArrayList(collapsing);
                 Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
+                yield return null;
+                
+
                 if (CheckValidity(entropy, output_size))
                     break;
             }
