@@ -233,11 +233,15 @@ namespace WaveFunctionCollapse
 
                         } else {
                             int solution_qtd = 0;
+                            if (patterns != null)
+                                if (coll[x][y] != null)
+                                if (coll[x][y].Count > 0)
+                                    if (patterns[coll[x][y][0]].possible_neighbors != null)
                             for (int o = 0; o < patterns[coll[x][y][0]].possible_neighbors.Length; o++)
                             {
                                 solution_qtd += patterns[coll[x][y][0]].possible_neighbors[o].Count;
                             }
-                            entropy = 10/solution_qtd;
+                            entropy = 100/(solution_qtd+1);
                             //entropy *= dist_epicenter;
 
 

@@ -37,7 +37,7 @@ public class MultipleTester : MonoBehaviour
     private void Start()
     {
         StartCoroutine(Test());
-        StartCoroutine(ReloadScene(3));
+        StartCoroutine(ReloadScene(4));
     }
     IEnumerator ReloadScene(float delay)
     {
@@ -109,10 +109,10 @@ public class MultipleTester : MonoBehaviour
                 }
 
                 if (index == -1)
-                    Instantiate(invalid_tile, new Vector3(y+250, -10, -x + 250), Quaternion.identity);
+                    Instantiate(invalid_tile, new Vector3(x+250, -10, -y + 250), Quaternion.identity);
                  else
                 {
-                    Instantiate(tiles[index], new Vector3(y + 250, -10, -x + 250), Quaternion.identity);
+                    Instantiate(tiles[index], new Vector3(x + 250, -10, -y + 250), Quaternion.identity);
 
                 }
 
@@ -181,7 +181,7 @@ public class MultipleTester : MonoBehaviour
                 log = ReadArrayList(collapsing);
                 Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
-                yield return null;
+                //yield return null;
                 
 
                 if (CheckValidity(entropy, output_size))
