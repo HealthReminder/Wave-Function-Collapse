@@ -244,8 +244,9 @@ namespace WaveFunctionCollapse
                             entropy = 100/(solution_qtd+1);
                             //entropy *= dist_epicenter;
 
+                            int neighbor_count = GetCollapsedNeighborCount(x, y, entr) + 1;
+                            entropy *= neighbor_count;
 
-                            entropy *= GetCollapsedNeighborCount(x, y, entr) + 1;
 
 
                             entr[x][y] = entropy;
@@ -261,37 +262,22 @@ namespace WaveFunctionCollapse
             int count = 0;
             if (y - 1 >= 0)
                 if (entr[x][y - 1] == -1)
-                    count += 3;
-
-            else
-                count++;
+                    count += 1;
 
             if (x + 1 < entr.Length)
                 if (entr[x + 1][y] == -1)
-                    count += 3;
-
-            else
-                count++;
-
+                    count += 1;
 
             if (y + 1 < entr[0].Length)
                 if (entr[x][y + 1] == -1)
-                    count += 3;
-
-            else
-                count++;
-
+                    count += 1;
 
             if (x - 1 >= 0)
                 if (entr[x - 1][y] == -1)
-                    count+=3;
-
-            else
-                count++;
-
+                    count += 1;
 
             //Debug.Log("Cell has " + count + "collapsed neighbors");
-            return (count*count);
+            return (count);
         }
         public static List<int> GetHyperstates(List<Pattern> hyper_patterns)
         {
