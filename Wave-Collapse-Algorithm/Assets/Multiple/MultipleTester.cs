@@ -11,6 +11,7 @@ public class MultipleTester : MonoBehaviour
     //It is a list that composes the tileset
     public Transform tileset_transform;
     public Tile invalid_tile;
+    public Transform tiles_pivot;
     //This array contains the tiles from a neighbor constraint standpoint
     Tile[] unique_tileset;
     //Dataset size is the size of the side of the grid that represents the dataset, only works on square matrix
@@ -36,13 +37,14 @@ public class MultipleTester : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(Test());
-        StartCoroutine(ReloadScene(4));
+        StartCoroutine(ReloadAfterRoutine());
     }
-    IEnumerator ReloadScene(float delay)
+    IEnumerator ReloadAfterRoutine()
     {
-        yield return new WaitForSeconds(delay);
+        yield return (Test());
+        yield return new WaitForSeconds(5);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
     }
     IEnumerator Test()
     {
@@ -87,13 +89,16 @@ public class MultipleTester : MonoBehaviour
         //Optional parameters to include a preset first cell
         yield return CollapseArray(output_size, unique);
 
-        StartCoroutine(InstantiateOutput(output, unique_tileset, invalid_tile));
+        InstantiateOutput(output, unique_tileset, invalid_tile);
 
         Debug.Log("Finished test routine.");
         yield break;
     }
-    public static IEnumerator InstantiateOutput(int[][] indexes, Tile[] tiles, Tile invalid_tile)
+    public void InstantiateOutput(int[][] indexes, Tile[] tiles, Tile invalid_tile)
     {
+        //Clear old tiles
+        for (int i = tiles_pivot.childCount - 1; i > 0 ; i--)
+            Destroy(tiles_pivot.GetChild(i).gameObject);
         int side = indexes.Length;
         int l = tiles.Length;
         for (int y = 0; y < side; y++)
@@ -109,17 +114,15 @@ public class MultipleTester : MonoBehaviour
                 }
 
                 if (index == -1)
-                    Instantiate(invalid_tile, new Vector3(x+250, -10, -y + 250), Quaternion.identity);
+                    Instantiate(invalid_tile, new Vector3(x+250, -10, -y + 250), Quaternion.identity, tiles_pivot);
                  else
                 {
-                    Instantiate(tiles[index], new Vector3(x + 250, -10, -y + 250), Quaternion.identity);
+                    Instantiate(tiles[index], new Vector3(x + 250, -10, -y + 250), Quaternion.identity, tiles_pivot);
 
                 }
 
             }
         }
-
-        yield return null;
     }
     IEnumerator CollapseArray(int output_size, List<Pattern> all_patterns, int initial_pattern = -1, int initial_x = -1, int initial_y = -1)
     {
@@ -181,8 +184,13 @@ public class MultipleTester : MonoBehaviour
                 log = ReadArrayList(collapsing);
                 Debug.Log("<color=green> " + t +" interpreted output array" + " collapse: </color> \n" + log);
 
-                //yield return null;
-                
+
+                output = WFCInputOutput.GetOutputArray(collapsing, unique, pattern_size);
+                yield return null;
+
+                InstantiateOutput(output, unique_tileset, invalid_tile);
+                yield return null;
+
 
                 if (CheckValidity(entropy, output_size))
                     break;
