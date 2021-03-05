@@ -12,7 +12,7 @@
       It includes a suite of five automated module tests with more than twenty unit tests in total to evaluate each step of the algorithm and its edge cases.
   </h2>
   <br><p> </p>
-   <img src = "https://media1.giphy.com/media/AC3CFF87Vv7ukZkwPO/giphy.gif" alt = "A GIF example of what the algorithm can generate." id="portrait_image" width = "410px" height = "340px">
+   <img src = "https://media4.giphy.com/media/eqxnk56DaSaEMwqEwg/giphy.gif" alt = "A GIF example of what the algorithm can generate." id="portrait_image" width = "450px" height = "450px">
    <h3>
       <br>
       Example of the automated tests catching an error amidst the program processes:
@@ -23,5 +23,6 @@
  <br><p> </p>
  <br><p> </p>
  <br><p> </p>
+ <img src = "https://media1.giphy.com/media/AC3CFF87Vv7ukZkwPO/giphy.gif" alt = "An older GIF example of what the algorithm can generate." id="portrait_image" width = "410px" height = "340px">
 
 </html>
