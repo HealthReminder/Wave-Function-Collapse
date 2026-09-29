@@ -15,7 +15,6 @@
    <img src = "https://media4.giphy.com/media/eqxnk56DaSaEMwqEwg/giphy.gif" alt = "A GIF example of what the algorithm can generate." id="portrait_image" width = "450px" height = "450px">
    <h3>
       <br>
-      Example of the automated tests catching an error amidst the program processes:
   </h3>
     <img src = "https://i.imgur.com/31vy2SY.png" alt = "A screenshot of how the automated tests may look like when flagging an error." id="portrait_image" width = "600px">
  
